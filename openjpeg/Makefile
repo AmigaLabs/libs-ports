@@ -32,7 +32,6 @@ download:
 init: download
 	@cd ${PKGNAME} && \
 	mkdir build
-	
 
 build:
 	cd ${PKGNAME}/build && \
@@ -53,8 +52,7 @@ cleanbuild:
 
 cleanall:
 	@echo "-> Remove archive and folder"
-	@rm -rf ./${PKGNAME}.tar.gz ./${PKGNAME} ./SDK \
-		./libopenjpeg-${LIB_VERSION}.lha
+	@rm -rf ./${PKGNAME}.tar.gz ./${PKGNAME} ./SDK
 
 release-init:
 	@echo "-> Clear previous release folders..."
@@ -64,28 +62,33 @@ release-init:
 # @mkdir -p ./SDK/local/clib2/lib
 	@mkdir -p ./SDK/local/clib4/lib ./SDK/local/clib4/bin
 	@mkdir -p ./SDK/local/newlib/lib ./SDK/local/newlib/bin
+	@mkdir -p ./SDK/local/Documentation/openjpeg
+	@cp ${PKGNAME}/LICENSE ./SDK/local/Documentation/openjpeg/
+	@cp ${PKGNAME}/README* ./SDK/local/Documentation/openjpeg/
+	@cp ${PKGNAME}/NEWS* ./SDK/local/Documentation/openjpeg/
+	@cp -R ${PKGNAME}/doc/man/* ./SDK/local/Documentation/openjpeg/
 
 newlib:
-	@echo "-> Building newlib based libraries..."
-	@make LIBC=newlib
-	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/newlib/lib/
-	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/newlib/bin/
+	@echo "-> Building $@ based libraries..."
+	@make LIBC=$@
+	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
 	@cp ./${PKGNAME}/src/lib/openjp2/openjpeg.h ./SDK/local/common/include/
 
 # clib2:
-# 	@echo "-> Building clib2 based libraries..."
-# 	@make clib2 LIBC=clib2
-# 	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/clib2/lib/
-# 	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/clib2/bin/
+# 	@echo "-> Building $@ based libraries..."
+# 	@make LIBC=$@
+# 	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
+# 	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
+
+clib4:
+	@echo "-> Building $@ based libraries..."
+	@make LIBC=$@
+	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
 
 archive:
 	@echo "-> Creating the lha release file..."
-	@lha -aeq ./libopenjpeg-${LIB_VERSION}.lha ./SDK/
-
-clib4:
-	@echo "-> Building clib4 based libraries..."
-	@make LIBC=clib4
-	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/clib4/lib/
-	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/clib4/bin/
+	@lha -aeq ./${PKGNAME}.lha ./SDK/
 
 release: release-init newlib cleanbuild clib4 cleanbuild archive
