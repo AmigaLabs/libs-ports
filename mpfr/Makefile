@@ -34,7 +34,8 @@ build:
 
 cleanbuild:
 	@echo "-> Clean the build folder"
-	@rm -rf ./${PKGNAME}/src/.libs ./${PKGNAME}/src/libmpfr.la
+	@rm -rf ./${PKGNAME}/src/.libs ./${PKGNAME}/src/libmpfr.la \
+		./${PKGNAME}/*.o ./${PKGNAME}/*.lo
 
 cleanall:
 	@echo "-> Remove archive and folder"
@@ -69,8 +70,17 @@ newlib:
 	@cp ./${PKGNAME}/examples/* ./SDK/local/common/examples/mpfr/
 	@cp ./${PKGNAME}/m4/*.m4 ./SDK/local/Documentation/mpfr/
 
-# clib2:
-# 	@echo "-> Building $@ based libraries..."
+clib2:
+	@echo "-> Building $@ based libraries..."
+	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
+	@mkdir -p ./SDK/local/$@/lib/pkgconfig
+	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
+		./${PKGNAME}/src/.libs/libmpfr.lai \
+		./${PKGNAME}/src/.libs/libmpfr.so \
+		./${PKGNAME}/src/libmpfr.la \
+		./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
@@ -89,4 +99,4 @@ archive:
 	@rm -f ./${PKGNAME}.lha
 	@lha -aeq ./${PKGNAME}.lha ./SDK/
 
-release: release-init newlib cleanbuild clib4 cleanbuild archive
+release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive
