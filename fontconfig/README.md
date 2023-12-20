@@ -4,7 +4,7 @@ The scripts compile **fontconfig** from [https://www.freedesktop.org/wiki/Softwa
 A new release lha archive can be created to be used with the AmigaOS 4 SDK, for native and cross compiling.
 
 **Supported libc**
-- None yet (WIP)
+- clib4
 
 ## How to compile
 ```
@@ -25,4 +25,4 @@ make release
 ```
 
 ## Known bugs and todo
-- not compiling yet for any libc
+- support for clib2 and newlib
