@@ -67,7 +67,6 @@ release-init:
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include
-# @mkdir -p ./SDK/local/clib2/lib
 	@mkdir -p ./SDK/local/Documentation/openjpeg
 	@cp ${PKGNAME}/LICENSE ./SDK/local/Documentation/openjpeg/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/openjpeg/
@@ -87,9 +86,6 @@ newlib:
 
 # clib2:
 # 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
-# 	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
 
 clib4:
 	@echo "-> Building $@ based libraries..."

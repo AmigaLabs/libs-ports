@@ -41,9 +41,6 @@ release-init:
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include
-	@mkdir -p ./SDK/local/clib2/lib
-	@mkdir -p ./SDK/local/clib4/lib
-	@mkdir -p ./SDK/local/newlib/lib
 	@mkdir -p ./SDK/local/Documentation/hyphen
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/hyphen/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/hyphen/
@@ -52,6 +49,7 @@ release-init:
 newlib:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
 	@cp ./${PKGNAME}/.libs/libhyphen.a \
 		./${PKGNAME}/.libs/libhyphen.lai \
 		./${PKGNAME}/libhyphen.la \
@@ -61,6 +59,7 @@ newlib:
 clib2:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
 	@cp ./${PKGNAME}/.libs/libhyphen.a \
 		./${PKGNAME}/.libs/libhyphen.lai \
 		./${PKGNAME}/libhyphen.la \
@@ -69,6 +68,7 @@ clib2:
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
 	@cp ./${PKGNAME}/.libs/libhyphen.a \
 		./${PKGNAME}/.libs/libhyphen.lai \
 		./${PKGNAME}/libhyphen.la \

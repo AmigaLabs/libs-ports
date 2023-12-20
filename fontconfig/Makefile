@@ -48,37 +48,22 @@ release-init:
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include/fontconfig
-# @mkdir -p ./SDK/local/clib2/bin
-# @mkdir -p ./SDK/local/clib2/lib
-# @mkdir -p ./SDK/local/clib2/lib/pkgconfig
-	@mkdir -p ./SDK/local/clib4/bin
-	@mkdir -p ./SDK/local/clib4/lib
-	@mkdir -p ./SDK/local/clib4/lib/pkgconfig
-# @mkdir -p ./SDK/local/newlib/bin
-# @mkdir -p ./SDK/local/newlib/lib
-# @mkdir -p ./SDK/local/newlib/lib/pkgconfig
 	@mkdir -p ./SDK/local/Documentation/fontconfig
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/fontconfig/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/fontconfig/
 
 # newlib:
 # 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@cp ./${PKGNAME}/src/.libs/libfontconfig.a \
-# 		./${PKGNAME}/src/.libs/libfontconfig.la \
-# 		./SDK/local/$@/lib/
-# 	@cp ./${PKGNAME}/*.h ./SDK/local/common/include/
 
 # clib2:
 # 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@cp ./${PKGNAME}/src/.libs/libfontconfig.a \
-# 		./${PKGNAME}/src/.libs/libfontconfig.la \
-# 		./SDK/local/$@/lib/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/bin
+	@mkdir -p ./SDK/local/$@/lib
+	@mkdir -p ./SDK/local/$@/lib/pkgconfig
 	@cp ./${PKGNAME}/src/.libs/libfontconfig.a \
 		./${PKGNAME}/src/libfontconfig.la \
 		./SDK/local/$@/lib/

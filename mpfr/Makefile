@@ -49,12 +49,6 @@ release-init:
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include/mpfr
 	@mkdir -p ./SDK/local/common/examples/mpfr
-# @mkdir -p ./SDK/local/clib2/lib
-# @mkdir -p ./SDK/local/clib2/lib/pkgconfig
-	@mkdir -p ./SDK/local/clib4/lib
-	@mkdir -p ./SDK/local/clib4/lib/pkgconfig
-	@mkdir -p ./SDK/local/newlib/lib
-	@mkdir -p ./SDK/local/newlib/lib/pkgconfig
 	@mkdir -p ./SDK/local/Documentation/mpfr
 	@cp ${PKGNAME}/AUTHORS* ./SDK/local/Documentation/mpfr/
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/mpfr/
@@ -63,6 +57,8 @@ release-init:
 newlib:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
+	@mkdir -p ./SDK/local/$@/lib/pkgconfig
 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
 		./${PKGNAME}/src/.libs/libmpfr.lai \
 		./${PKGNAME}/src/.libs/libmpfr.so \
@@ -75,14 +71,12 @@ newlib:
 
 # clib2:
 # 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
-# 		./${PKGNAME}/src/.libs/libmpfr.la \
-# 		./SDK/local/$@/lib/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib
+	@mkdir -p ./SDK/local/$@/lib/pkgconfig
 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
 		./${PKGNAME}/src/.libs/libmpfr.lai \
 		./${PKGNAME}/src/.libs/libmpfr.so \
