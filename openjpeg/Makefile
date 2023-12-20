@@ -44,8 +44,12 @@ build:
 		-DBUILD_SHARED_LIBS=OFF \
 		-DBUILD_CODEC=${CODEC} \
 		-DBUILD_BINARY=OFF \
+		--install-prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
+
+#####################################################################
+# Clean jobs
 
 cleanbuild:
 	@echo "-> Clean the build folder"
@@ -55,14 +59,15 @@ cleanall:
 	@echo "-> Remove archive and folder"
 	@rm -rf ./${PKGNAME}.tar.gz ./${PKGNAME} ./SDK
 
+#####################################################################
+# Release jobs
+
 release-init:
 	@echo "-> Clear previous release folders..."
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include
 # @mkdir -p ./SDK/local/clib2/lib
-	@mkdir -p ./SDK/local/clib4/lib ./SDK/local/clib4/bin
-	@mkdir -p ./SDK/local/newlib/lib ./SDK/local/newlib/bin
 	@mkdir -p ./SDK/local/Documentation/openjpeg
 	@cp ${PKGNAME}/LICENSE ./SDK/local/Documentation/openjpeg/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/openjpeg/
@@ -72,8 +77,12 @@ release-init:
 newlib:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib \
+		./SDK/local/$@/lib/pkgconfig \
+		./SDK/local/$@/bin
 	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
+	@cp ./${PKGNAME}/build/libopenjp2.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/src/lib/openjp2/openjpeg.h ./SDK/local/common/include/
 
 # clib2:
@@ -85,8 +94,12 @@ newlib:
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
+	@mkdir -p ./SDK/local/$@/lib \
+		./SDK/local/$@/lib/pkgconfig \
+		./SDK/local/$@/bin
 	@cp ./${PKGNAME}/build/bin/libopenjp2.a ./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/build/bin/opj_* ./SDK/local/$@/bin/
+	@cp ./${PKGNAME}/build/libopenjp2.pc ./SDK/local/$@/lib/pkgconfig/
 
 archive:
 	@echo "-> Creating the lha release file..."
