@@ -1,6 +1,6 @@
 # Set the libc to be used with the LIBC argument
 # possible values newlib, clib2, clib4
-# make -f Makefile.os4 LIBC=clib4
+# make LIBC=clib4
 # 
 
 LIB_VERSION=2.5.0
@@ -90,6 +90,7 @@ clib4:
 
 archive:
 	@echo "-> Creating the lha release file..."
+	@rm -f ./${PKGNAME}.lha
 	@lha -aeq ./${PKGNAME}.lha ./SDK/
 
 release: release-init newlib cleanbuild clib4 cleanbuild archive
