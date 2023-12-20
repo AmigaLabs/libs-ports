@@ -22,9 +22,8 @@ build:
 	cd ${PKGNAME} && \
 	CC="ppc-amigaos-gcc" \
 	CXX="ppc-amigaos-g++" \
-	CFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
-	CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
-	LDFLAGS="-lpthread -athread=native" \
+	CFLAGS="-mcrt=${LIBC} -O2 -fPIC -lpthread -athread=native" \
+	CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC -lpthread -athread=native" \
 	./configure --host=ppc-amigaos --enable-cxx=yes --enable-shared=yes \
 		--prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
@@ -61,12 +60,12 @@ newlib:
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib
 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-	@cp ./${PKGNAME}/.libs/libgmp.a \
-		./${PKGNAME}/.libs/libgmp.lai \
-		./${PKGNAME}/.libs/libgmp.so \
-		./${PKGNAME}/libgmp.la \
+	@cp ./${PKGNAME}/.libs/libgmp*.a \
+		./${PKGNAME}/.libs/libgmp*.lai \
+		./${PKGNAME}/.libs/libgmp*.so \
+		./${PKGNAME}/libgmp*.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp*.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/gmp.h ./${PKGNAME}/gmpxx.h ./SDK/local/common/include/
 
 clib2:
@@ -74,24 +73,24 @@ clib2:
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib
 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-	@cp ./${PKGNAME}/.libs/libgmp.a \
-		./${PKGNAME}/.libs/libgmp.lai \
-		./${PKGNAME}/.libs/libgmp.so \
-		./${PKGNAME}/libgmp.la \
+	@cp ./${PKGNAME}/.libs/libgmp*.a \
+		./${PKGNAME}/.libs/libgmp*.lai \
+		./${PKGNAME}/.libs/libgmp*.so \
+		./${PKGNAME}/libgmp*.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp*.pc ./SDK/local/$@/lib/pkgconfig/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib
 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-	@cp ./${PKGNAME}/.libs/libgmp.a \
-		./${PKGNAME}/.libs/libgmp.lai \
-		./${PKGNAME}/.libs/libgmp.so \
-		./${PKGNAME}/libgmp.la \
+	@cp ./${PKGNAME}/.libs/libgmp*.a \
+		./${PKGNAME}/.libs/libgmp*.lai \
+		./${PKGNAME}/.libs/libgmp*.so \
+		./${PKGNAME}/libgmp*.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp*.pc ./SDK/local/$@/lib/pkgconfig/
 
 archive:
 	@echo "-> Creating the lha release file..."

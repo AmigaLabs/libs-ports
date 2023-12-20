@@ -28,5 +28,3 @@ make release
 ```
 
 ## Known bugs and todo
-- The c++ libraries are not generated yet.
-- There are ABI issues when those libraries are used. Not ready yet (WIP)
