@@ -25,7 +25,7 @@ build:
 	PKG_CONFIG_PATH=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
 	LIBS="-lfreetype -lbz2 -lpng -lbrotlidec -lbrotlicommon -lz" \
 	./configure --host=ppc-amigaos --enable-shared=no \
-		--prefix=${SDK_PATH} \
+		--prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
 
