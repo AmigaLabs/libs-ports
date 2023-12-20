@@ -21,10 +21,11 @@ init: download
 build:
 	cd ${PKGNAME} && \
 	CC="ppc-amigaos-gcc" \
-	CFLAGS="-mcrt=${LIBC} -O2 -fPIC -I${SDK_PATH}/local/${LIBC}/include/freetype2" \
-	PKG_CONFIG_LIBDIR=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
-	LIBS="" \
-	./configure --host=ppc-amigaos --enable-shared=yes \
+	CXX="ppc-amigaos-g++" \
+	CFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
+	CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
+	LDFLAGS="-lpthread -athread=native" \
+	./configure --host=ppc-amigaos --enable-cxx=yes --enable-shared=yes \
 		--prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
@@ -65,7 +66,7 @@ newlib:
 		./${PKGNAME}/.libs/libgmp.so \
 		./${PKGNAME}/libgmp.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/gmp.h ./${PKGNAME}/gmpxx.h ./SDK/local/common/include/
 
 clib2:
@@ -78,7 +79,7 @@ clib2:
 		./${PKGNAME}/.libs/libgmp.so \
 		./${PKGNAME}/libgmp.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
@@ -90,7 +91,7 @@ clib4:
 		./${PKGNAME}/.libs/libgmp.so \
 		./${PKGNAME}/libgmp.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/gmp.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/gmp.pc ./${PKGNAME}/gmpxx.pc ./SDK/local/$@/lib/pkgconfig/
 
 archive:
 	@echo "-> Creating the lha release file..."
