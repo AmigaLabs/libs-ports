@@ -20,7 +20,8 @@ build:
 	cd ${PKGNAME} && \
 	autoreconf -fvi && \
 	CC="ppc-amigaos-gcc" CFLAGS="-mcrt=${LIBC} -O2 -fPIC" CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
-	./configure --host=ppc-amigaos --enable-shared=no && \
+	./configure --host=ppc-amigaos --enable-shared=no \
+	&& \
 	make -j$(shell nproc)
 
 cleanbuild:

@@ -43,7 +43,8 @@ build:
 		-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC} -lpthread -athread=native" \
 		-DBUILD_SHARED_LIBS=OFF \
 		-DBUILD_CODEC=${CODEC} \
-		-DBUILD_BINARY=OFF && \
+		-DBUILD_BINARY=OFF \
+	&& \
 	make -j$(shell nproc)
 
 cleanbuild:
