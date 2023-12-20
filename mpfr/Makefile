@@ -25,7 +25,7 @@ build:
 	PKG_CONFIG_LIBDIR=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
 	LIBS="" \
 	./configure --host=ppc-amigaos --enable-shared=yes \
-		--prefix=${SDK_PATH} \
+		--prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
 
@@ -68,7 +68,7 @@ newlib:
 		./${PKGNAME}/src/.libs/libmpfr.so \
 		./${PKGNAME}/src/libmpfr.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/clib4/lib/pkgconfig/
+	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/src/generic/*.h ./SDK/local/common/include/mpfr/
 	@cp ./${PKGNAME}/examples/* ./SDK/local/common/examples/mpfr/
 	@cp ./${PKGNAME}/m4/*.m4 ./SDK/local/Documentation/mpfr/
@@ -88,7 +88,7 @@ clib4:
 		./${PKGNAME}/src/.libs/libmpfr.so \
 		./${PKGNAME}/src/libmpfr.la \
 		./SDK/local/$@/lib/
-	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/clib4/lib/pkgconfig/
+	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
 
 archive:
 	@echo "-> Creating the lha release file..."
