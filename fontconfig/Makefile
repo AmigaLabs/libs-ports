@@ -1,4 +1,4 @@
-# Set the lic to be used with the LIBC argument
+# Set the libc to be used with the LIBC argument
 # possible values newlib, clib2, clib4
 # make LIBC=clib4
 # 
@@ -25,6 +25,7 @@ build:
 	PKG_CONFIG_PATH=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
 	LIBS="-lfreetype -lbz2 -lpng -lbrotlidec -lbrotlicommon -lz" \
 	./configure --host=ppc-amigaos --enable-shared=no \
+		--prefix=${SDK_PATH} \
 	&& \
 	make -j$(shell nproc)
 
@@ -49,10 +50,13 @@ release-init:
 	@mkdir -p ./SDK/local/common/include/fontconfig
 # @mkdir -p ./SDK/local/clib2/bin
 # @mkdir -p ./SDK/local/clib2/lib
+# @mkdir -p ./SDK/local/clib2/lib/pkgconfig
 	@mkdir -p ./SDK/local/clib4/bin
 	@mkdir -p ./SDK/local/clib4/lib
+	@mkdir -p ./SDK/local/clib4/lib/pkgconfig
 # @mkdir -p ./SDK/local/newlib/bin
 # @mkdir -p ./SDK/local/newlib/lib
+# @mkdir -p ./SDK/local/newlib/lib/pkgconfig
 	@mkdir -p ./SDK/local/Documentation/fontconfig
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/fontconfig/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/fontconfig/
@@ -78,6 +82,7 @@ clib4:
 	@cp ./${PKGNAME}/src/.libs/libfontconfig.a \
 		./${PKGNAME}/src/libfontconfig.la \
 		./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/fontconfig.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/fontconfig/*.h ./SDK/local/common/include/fontconfig/
 	@cp ./${PKGNAME}/doc/*.pdf ./SDK/local/Documentation/fontconfig/
 	@cp ./${PKGNAME}/fc-cache/fc-cache \

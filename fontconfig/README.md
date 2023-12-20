@@ -1,4 +1,4 @@
-# fontconfig for AmigaOS 4 - WIP
+# fontconfig for AmigaOS 4
 
 The scripts compile **fontconfig** from [https://www.freedesktop.org/wiki/Software/fontconfig/](https://www.freedesktop.org/wiki/Software/fontconfig/) for AmigaOS 4. 
 A new release lha archive can be created to be used with the AmigaOS 4 SDK, for native and cross compiling.
