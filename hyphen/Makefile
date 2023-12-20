@@ -21,6 +21,7 @@ build:
 	autoreconf -fvi && \
 	CC="ppc-amigaos-gcc" CFLAGS="-mcrt=${LIBC} -O2 -fPIC" CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
 	./configure --host=ppc-amigaos --enable-shared=no \
+		--prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
 
@@ -51,20 +52,26 @@ release-init:
 newlib:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
-	@cp ./${PKGNAME}/.libs/libhyphen.a ./${PKGNAME}/.libs/libhyphen.la \
+	@cp ./${PKGNAME}/.libs/libhyphen.a \
+		./${PKGNAME}/.libs/libhyphen.lai \
+		./${PKGNAME}/libhyphen.la \
 		./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/*.h ./SDK/local/common/include/
 
 clib2:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
-	@cp ./${PKGNAME}/.libs/libhyphen.a ./${PKGNAME}/.libs/libhyphen.la \
+	@cp ./${PKGNAME}/.libs/libhyphen.a \
+		./${PKGNAME}/.libs/libhyphen.lai \
+		./${PKGNAME}/libhyphen.la \
 		./SDK/local/$@/lib/
 
 clib4:
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
-	@cp ./${PKGNAME}/.libs/libhyphen.a ./${PKGNAME}/.libs/libhyphen.la \
+	@cp ./${PKGNAME}/.libs/libhyphen.a \
+		./${PKGNAME}/.libs/libhyphen.lai \
+		./${PKGNAME}/libhyphen.la \
 		./SDK/local/$@/lib/
 
 archive:
