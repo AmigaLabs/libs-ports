@@ -1,0 +1,27 @@
+diff -ruN curl-8.5.0/curl-config.in curl-8.5.0-patched/curl-config.in
+--- curl-8.5.0/curl-config.in	2023-11-17 14:45:04.000000000 +0000
++++ curl-8.5.0-patched/curl-config.in	2023-12-21 14:24:08.230314129 +0000
+@@ -162,7 +162,7 @@
+         else
+            CURLLIBDIR=""
+         fi
+-        if test "X@ENABLE_SHARED@" = "Xno"; then
++        if test "X@REQUIRE_LIB_DEPS@" = "Xyes"; then
+           echo ${CURLLIBDIR}-lcurl @LIBCURL_LIBS@
+         else
+           echo ${CURLLIBDIR}-lcurl
+diff -ruN curl-8.5.0/src/tool_main.c curl-8.5.0-patched/src/tool_main.c
+--- curl-8.5.0/src/tool_main.c	2023-12-05 14:57:41.000000000 +0000
++++ curl-8.5.0-patched/src/tool_main.c	2023-12-21 14:23:39.080292151 +0000
+@@ -75,6 +75,11 @@
+ int _CRT_glob = 0;
+ #endif /* __MINGW32__ */
+ 
++#if defined(__amigaos4__)
++static char *stack_cookie __attribute__((used)) = "$STACK: 500000\0";
++static char *version_cookie __attribute__((used)) = "$VER: curl 5.8.0 (21.12.2023) comment\0";
++#endif /* __amigaos4__ */
++
+ /* if we build a static library for unit tests, there is no main() function */
+ #ifndef UNITTESTS
+ 
