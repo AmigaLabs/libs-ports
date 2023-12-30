@@ -1,7 +1,8 @@
 # openjpeg for AmigaOS 4
 
-These scripts compile **openjpeg** from [https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0](https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0) for AmigaOS 4. 
-A new release lha archive can be created to be used with the AmigaOS 4 SDK, for native and cross compiling.
+Source: [https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0](https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0)
+
+This makefile can be used to compile the above library and create a new release lha archive, to be used with the AmigaOS 4 SDK, for native and cross compiling.
 
 **Supported libc**
 - newlib
@@ -26,4 +27,4 @@ make release
 ```
 
 ## Bugs and todo
-- support for clib2 when `sys/times.h` is available
+- clib2 is not supported because of lack of `sys/times.h`
