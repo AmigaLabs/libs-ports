@@ -7,6 +7,7 @@ This makefile can be used to compile the above library and create a new release 
 **Supported libc**
 - newlib
 - clib2
+- clib4
 
 ## How to compile
 ```
@@ -27,4 +28,3 @@ make release
 ```
 
 ## Known bugs and todo
-- support clib4, which right now fails

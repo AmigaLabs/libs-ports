@@ -16,7 +16,11 @@ download:
 		echo "-> Extract archive" && \
 		tar xzpf ${PKGNAME}.tar.gz
 
-init: download
+init: download patches
+
+patches:
+	@echo "-> Apply the patches"
+	@patch -s -p0 < ./patch-1.diff
 
 build:
 	@make -C ${PKGNAME}/src generic \
@@ -79,6 +83,6 @@ clib4:
 archive:
 	@echo "-> Creating the lha release file..."
 	@rm -f ./${PKGNAME}.lha
-	@lha -aeq ./${PKGNAME}.lha ./SDK/
+	@lha aq ./${PKGNAME}.lha ./SDK/
 
-release: release-init newlib cleanbuild clib2 cleanbuild archive
+release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive
