@@ -22,8 +22,12 @@ build:
 	CC="ppc-amigaos-gcc" CFLAGS="-mcrt=${LIBC} -O2 -fPIC" CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
 	./configure --host=ppc-amigaos --enable-shared=no \
 		--prefix=${SDK_PATH}/local/${LIBC} \
+		--includedir=${SDK_PATH}/local/common/include \
 	&& \
 	make -j$(shell nproc)
+
+#####################################################################
+# Clean jobs
 
 cleanbuild:
 	@echo "-> Clean the previous builds"
@@ -35,6 +39,9 @@ cleanbuild:
 cleanall:
 	@echo "-> Remove archive and folder"
 	@rm -rf ./${PKGNAME} ./SDK
+
+#####################################################################
+# Release jobs
 
 release-init:
 	@echo "-> Clear previous release folders..."
@@ -77,6 +84,6 @@ clib4:
 archive:
 	@echo "-> Creating the lha release file..."
 	@rm -f ./${PKGNAME}.lha
-	@lha -aeq ./${PKGNAME}.lha ./SDK/
+	@lha aq ./${PKGNAME}.lha ./SDK/
 
 release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive

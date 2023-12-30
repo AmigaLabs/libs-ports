@@ -23,9 +23,10 @@ build:
 	CC="ppc-amigaos-gcc" \
 	CFLAGS="-mcrt=${LIBC} -O2 -fPIC -I${SDK_PATH}/local/${LIBC}/include/freetype2" \
 	PKG_CONFIG_PATH=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
-	LIBS="-lfreetype -lbz2 -lpng -lbrotlidec -lbrotlicommon -lz" \
+	LIBS="-lfreetype -lbz2 -lpng16 -lbrotlidec -lbrotlicommon -lz" \
 	./configure --host=ppc-amigaos --enable-shared=no \
 		--prefix=${SDK_PATH}/local/${LIBC} \
+		--includedir=${SDK_PATH}/local/common/include \
 	&& \
 	make -j$(shell nproc)
 
@@ -84,6 +85,6 @@ clib4:
 archive:
 	@echo "-> Creating the lha release file..."
 	@rm -f ./${PKGNAME}.lha
-	@lha -aeq ./${PKGNAME}.lha ./SDK/
+	@lha aq ./${PKGNAME}.lha ./SDK/
 
 release: release-init clib4 cleanbuild archive
