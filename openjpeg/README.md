@@ -1,6 +1,6 @@
 # openjpeg for AmigaOS 4
 
-Source: [https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0](https://github.com/uclouvain/openjpeg/releases/tag/v2.5.0)
+Source: [https://github.com/uclouvain/openjpeg/releases](https://github.com/uclouvain/openjpeg/releases)
 
 This makefile can be used to compile the above library and create a new release lha archive, to be used with the AmigaOS 4 SDK, for native and cross compiling.
 
@@ -15,7 +15,7 @@ make build
 ```
 
 The clib that will be used while compiling can be selected by using the `LIBC=` argument.
-Valid options are newlib, clib2 and clib4
+Valid options are newlib (default), clib2 and clib4
 ```
 make build LIBC=clib4
 ```

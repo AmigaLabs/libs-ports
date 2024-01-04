@@ -1,0 +1,6 @@
+.vscode
+*-patched
+*.tar.gz
+
+icu/icu-release
+curl/curl-8.*
