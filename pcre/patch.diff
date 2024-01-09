@@ -1,0 +1,106 @@
+diff -ruN pcre-8.45/pcregrep.c pcre-8.45-patched/pcregrep.c
+--- pcre-8.45/pcregrep.c	2018-06-26 18:02:42.000000000 +0100
++++ pcre-8.45-patched/pcregrep.c	2024-01-09 22:38:06.829497973 +0000
+@@ -74,7 +74,11 @@
+ #define FALSE 0
+ #define TRUE 1
+ 
++#if defined(__amigaos4__)
++typedef short int BOOL;
++#else
+ typedef int BOOL;
++#endif
+ 
+ #define OFFSET_SIZE 99
+ 
+diff -ruN pcre-8.45/pcre_internal.h pcre-8.45-patched/pcre_internal.h
+--- pcre-8.45/pcre_internal.h	2017-06-13 17:49:46.000000000 +0100
++++ pcre-8.45-patched/pcre_internal.h	2024-01-09 22:38:31.729508384 +0000
+@@ -1155,8 +1155,11 @@
+ /* Miscellaneous definitions. The #ifndef is to pacify compiler warnings in
+ environments where these macros are defined elsewhere. Unfortunately, there
+ is no way to do the same for the typedef. */
+-
++#if defined(__amigaos4__)
++typedef short int BOOL;
++#else
+ typedef int BOOL;
++#endif
+ 
+ #ifndef FALSE
+ #define FALSE   0
+diff -ruN pcre-8.45/pcreposix.c pcre-8.45-patched/pcreposix.c
+--- pcre-8.45/pcreposix.c	2020-02-10 16:59:09.000000000 +0000
++++ pcre-8.45-patched/pcreposix.c	2024-01-09 22:57:57.976662510 +0000
+@@ -208,7 +208,7 @@
+ *************************************************/
+ 
+ PCREPOSIX_EXP_DEFN size_t PCRE_CALL_CONVENTION
+-regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
++pcre_regerror(int errcode, const regex_t *preg, char *errbuf, size_t errbuf_size)
+ {
+ const char *message, *addmessage;
+ size_t length, addlength;
+@@ -243,7 +243,7 @@
+ *************************************************/
+ 
+ PCREPOSIX_EXP_DEFN void PCRE_CALL_CONVENTION
+-regfree(regex_t *preg)
++pcre_regfree(regex_t *preg)
+ {
+ (PUBL(free))(preg->re_pcre);
+ }
+@@ -266,7 +266,7 @@
+ */
+ 
+ PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
+-regcomp(regex_t *preg, const char *pattern, int cflags)
++pcre_regcomp(regex_t *preg, const char *pattern, int cflags)
+ {
+ const char *errorptr;
+ int erroffset;
+@@ -321,7 +321,7 @@
+ the only result is yes/no/error. */
+ 
+ PCREPOSIX_EXP_DEFN int PCRE_CALL_CONVENTION
+-regexec(const regex_t *preg, const char *string, size_t nmatch,
++pcre_regexec(const regex_t *preg, const char *string, size_t nmatch,
+   regmatch_t pmatch[], int eflags)
+ {
+ int rc, so, eo;
+diff -ruN pcre-8.45/pcreposix.h pcre-8.45-patched/pcreposix.h
+--- pcre-8.45/pcreposix.h	2014-01-31 14:32:51.000000000 +0000
++++ pcre-8.45-patched/pcreposix.h	2024-01-09 22:57:17.539978938 +0000
+@@ -133,11 +133,16 @@
+ 
+ /* The functions */
+ 
+-PCREPOSIX_EXP_DECL int regcomp(regex_t *, const char *, int);
+-PCREPOSIX_EXP_DECL int regexec(const regex_t *, const char *, size_t,
++PCREPOSIX_EXP_DECL int PCRE_CALL_CONVENTION pcre_regcomp(regex_t *, const char *, int);
++PCREPOSIX_EXP_DECL int PCRE_CALL_CONVENTION pcre_regexec(const regex_t *, const char *, size_t,
+                      regmatch_t *, int);
+-PCREPOSIX_EXP_DECL size_t regerror(int, const regex_t *, char *, size_t);
+-PCREPOSIX_EXP_DECL void regfree(regex_t *);
++PCREPOSIX_EXP_DECL size_t PCRE_CALL_CONVENTION pcre_regerror(int, const regex_t *, char *, size_t);
++PCREPOSIX_EXP_DECL void PCRE_CALL_CONVENTION pcre_regfree(regex_t *);
++
++#define regcomp  pcre_regcomp
++#define regexec  pcre_regexec
++#define regerror pcre_regerror
++#define regfree  pcre_regfree
+ 
+ #ifdef __cplusplus
+ }   /* extern "C" */
+diff -ruN pcre-8.45/pcretest.c pcre-8.45-patched/pcretest.c
+--- pcre-8.45/pcretest.c	2021-06-15 16:41:57.000000000 +0100
++++ pcre-8.45-patched/pcretest.c	2024-01-09 22:23:48.595806299 +0000
+@@ -3168,7 +3168,7 @@
+       ((stack_size = get_value((pcre_uint8 *)argv[op+1], &endptr)),
+         *endptr == 0))
+     {
+-#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS)
++#if defined(_WIN32) || defined(WIN32) || defined(__minix) || defined(NATIVE_ZOS) || defined(__VMS) || (defined(__amigaos4__) && (defined(__NEWLIB__) || defined(__CLIB2__)))
+     printf("PCRE: -S not supported on this OS\n");
+     exit(1);
+ #else
