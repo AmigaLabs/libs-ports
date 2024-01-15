@@ -16,11 +16,7 @@ download:
 		echo "-> Extract archive" && \
 		tar xzpf ${PKGNAME}.tar.gz
 
-init: download patches
-
-patches:
-	@echo "-> Apply the patches"
-	@patch -s -p0 < ./patch-1.diff
+init: download
 
 build:
 	@make -C ${PKGNAME}/src generic \
