@@ -35,6 +35,7 @@ build:
 
 cleanbuild:
 	@echo "-> Clean the build folder"
+	@make -C ${PKGNAME} clean
 	@rm -rf ./${PKGNAME}/src/.libs ./${PKGNAME}/src/libmpfr.la \
 		./${PKGNAME}/*.o ./${PKGNAME}/*.lo
 
@@ -49,7 +50,7 @@ release-init:
 	@echo "-> Clear previous release folders..."
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
-	@mkdir -p ./SDK/local/common/include/mpfr
+	@mkdir -p ./SDK/local/common/include
 	@mkdir -p ./SDK/local/common/examples/mpfr
 	@mkdir -p ./SDK/local/Documentation/mpfr
 	@cp ${PKGNAME}/AUTHORS* ./SDK/local/Documentation/mpfr/
@@ -67,7 +68,8 @@ newlib:
 		./${PKGNAME}/src/libmpfr.la \
 		./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
-	@cp ./${PKGNAME}/src/generic/*.h ./SDK/local/common/include/mpfr/
+	@cp ./${PKGNAME}/src/mpfr.h ./${PKGNAME}/src/mpf2mpfr.h \
+		./SDK/local/common/include/
 	@cp ./${PKGNAME}/examples/* ./SDK/local/common/examples/mpfr/
 	@cp ./${PKGNAME}/m4/*.m4 ./SDK/local/Documentation/mpfr/
 
