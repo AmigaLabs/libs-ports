@@ -8,10 +8,6 @@ LIBC?=newlib
 
 PKGNAME=pcre-${LIB_VERSION}
 
-ifeq ($(LIBC), clib4)
-CODEC=ON
-endif
-
 all: build
 
 download:
