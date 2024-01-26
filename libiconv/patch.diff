@@ -1,0 +1,12 @@
+diff -ruN libiconv-1.17/src/Makefile.in libiconv-1.17-patched/src/Makefile.in
+--- libiconv-1.17/src/Makefile.in	2019-01-27 22:07:13.000000000 +0000
++++ libiconv-1.17-patched/src/Makefile.in	2024-01-26 19:31:29.713106067 +0000
+@@ -75,7 +75,7 @@
+ 
+ # This is the temporary iconv executable, without internationalization.
+ iconv_no_i18n$(EXEEXT) : iconv_no_i18n.@OBJEXT@ ../lib/libiconv.la $(OBJECTS_RES_@WOE32@)
+-	$(LIBTOOL_LINK) $(CC) $(LDFLAGS) $(CFLAGS) iconv_no_i18n.@OBJEXT@ ../srclib/libicrt.a ../lib/libiconv.la $(OBJECTS_RES_@WOE32@) -o $@
++	$(LIBTOOL_LINK) $(CC) -use-dynld $(LDFLAGS) $(CFLAGS) iconv_no_i18n.@OBJEXT@ ../srclib/libicrt.a ../lib/libiconv.la $(OBJECTS_RES_@WOE32@) -o $@
+ 
+ iconv_no_i18n.@OBJEXT@ : $(srcdir)/iconv_no_i18n.c $(srcdir)/iconv.c
+ 	$(CC) -c $(INCLUDES) -I../lib $(CFLAGS) $(CPPFLAGS) -DINSTALLDIR=\"$(bindir)\" -DLOCALEDIR=\"$(localedir)\" $(srcdir)/iconv_no_i18n.c
