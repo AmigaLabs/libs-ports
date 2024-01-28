@@ -1,0 +1,26 @@
+diff -ruN sdl2-2.28.4/Makefile.amigaos4 sdl2-2.28.4-patched/Makefile.amigaos4
+--- sdl2-2.28.4/Makefile.amigaos4	2023-10-04 18:20:11.000000000 +0100
++++ sdl2-2.28.4-patched/Makefile.amigaos4	2024-01-28 20:34:31.857552878 +0000
+@@ -5,11 +5,12 @@
+ CC = ppc-amigaos-gcc
+ CXX = ppc-amigaos-g++
+ STRIP = ppc-amigaos-strip
++CRT ?= newlib
+ CATCOMP = catcomp
+ 
+ AMIGADATE = $(shell date +"%-d.%m.%Y")
+ 
+-CFLAGS  = -gstabs -O2 -Wall -fPIC -fcommon -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
++CFLAGS  = -mcrt=$(CRT) -gstabs -O2 -Wall -fPIC -fcommon -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
+ 
+ TARGET_STATIC  = libSDL2.a
+ TARGET_SHARED  = libSDL2-2.28.so
+@@ -79,7 +80,7 @@
+ 	$(RANLIB) $@
+ 
+ $(TARGET_SHARED): $(OBJECTS) $(VERSION_OBJECT)
+-	$(CC) -shared -Wl,-soname,$(TARGET_SHARED) -o $(TARGET_SHARED) $(OBJECTS) $(VERSION_OBJECT)
++	$(CC) -mcrt=$(CRT) -shared -Wl,-soname,$(TARGET_SHARED) -o $(TARGET_SHARED) $(OBJECTS) $(VERSION_OBJECT)
+ 
+ $(PREFS_PROGRAM): $(PREFS_OBJECT)
+ 	$(CC) -o $@ $^ # -lauto
