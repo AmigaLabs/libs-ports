@@ -108,12 +108,13 @@ package:
 ifneq ($(DEBUG),debug)
 	@mkdir -p ./SDK/local/${LIBC}/include/SDL2
 	@cp -r ${PKGNAME}/include/* ./SDK/local/${LIBC}/include/SDL2/
-	@cp ./${PKGNAME}/libSDL2.a ./${PKGNAME}/libSDL2_test.a \
-		./${PKGNAME}/libSDL2-2.28.so \
-		./SDK/local/${LIBC}/lib/
+
+	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es.a
+	@cp ./${PKGNAME}/libSDL2_test.a ./SDK/local/${LIBC}/lib/libSDL2_test_gl4es.a
+	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_gl4es.so
 else
-	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_debug.a
-	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_debug.so
+	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es_debug.a
+	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_gl4es_debug.so
 endif
 
 .PHONY: archive
