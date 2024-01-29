@@ -3,31 +3,14 @@
 # make build LIBC=clib4
 # 
 
-CCRED=\033[31m
-CCGREEN=\033[32m
-CCYELLOW=\033[33m
-CCBLUE=\033[34m
-CCPINK=\033[35m
-CCLBLUE=\033[36m
-CCEND=\033[0m
-CCBOLD=\033[1m
-CCITAL=\033[3m
-CCUNDR=\033[4m
-
 LIB_VERSION=2.28.4
 LIBC?=newlib
 DEBUG=
 
 PKGNAME=sdl2-${LIB_VERSION}
 
-ifeq (,$(filter $(LIBC),newlib clib2 clib4))
-@echo '${CCPINK}${CCBOLD}\n-> Packaging ${LIBC} based libraries...\n${CCEND}'
-$(error Wrong libc provided. Valid values are: newlib/clib2/clib4)
-endif
-
-.PHONY: help
-help: ## Display this help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make ${CCLBLUE}<target>${CCEND}\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  ${CCLBLUE}%-15s${CCEND} %s\n", $$1, $$2 } /^##@/ { printf "\n${CCBOLD}%s${CCEND}\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+include ../_common/help.mk
+include ../_common/checks.mk
 
 .PHONY: download
 download:
