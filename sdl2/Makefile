@@ -82,7 +82,6 @@ release-init: ## Prepare the release folders
 	@cp ${PKGNAME}/LICENSE* ./SDK/local/Documentation/SDL2/
 	@cp ${PKGNAME}/CREDITS* ./SDK/local/Documentation/SDL2/
 
-
 .PHONY: package
 package:
 	@echo "${CCPINK}${CCBOLD}\n-> Packaging ${LIBC} based libraries...\n${CCEND}"

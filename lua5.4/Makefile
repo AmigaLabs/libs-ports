@@ -8,37 +8,67 @@ LIBC?=newlib
 
 PKGNAME=lua-${LIB_VERSION}
 
-all: build
+include ../_common/help.mk
+include ../_common/checks.mk
 
+.PHONY: download
 download:
-	@echo "-> Download archive ${PKGNAME}"
+	@echo "${CCPINK}${CCBOLD}\n-> Download archive ${PKGNAME}\n${CCEND}"
 	@curl -fsSLk "https://www.lua.org/ftp/${PKGNAME}.tar.gz" -o ${PKGNAME}.tar.gz && \
-		echo "-> Extract archive" && \
+		echo "${CCPINK}${CCBOLD}\n-> Extract archive\n${CCEND}" && \
 		tar xzpf ${PKGNAME}.tar.gz
 
-init: download
+#####################################################################
+##@ Build
 
-build:
+.PHONY: init
+init: download patch
+
+.PHONY: patch
+patch:
+	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
+	@patch -s -p0 < ./patch.diff
+
+.PHONY: build
+build: # Build with specified LIBC=(newlib|clib2|clib4)
+	@echo "${CCPINK}${CCBOLD}\n-> Building ${LIBC} based libraries...\n${CCEND}"
 	@make -C ${PKGNAME}/src generic \
 		CC="ppc-amigaos-gcc -mcrt=${LIBC} -std=gnu99" \
 		-j$(shell nproc)
 
-#####################################################################
-# Clean jobs
+.PHONY: newlib clib2 clib4
+newlib: ## Build using newlib crt and prepares the files for packaging
+	@make build LIBC=$@
+	@make package LIBC=$@
+clib2: ## Build using clib2 crt and prepares the files for packaging
+	@make build LIBC=$@
+	@make package LIBC=$@
+clib4: ## Build using clib4 crt and prepares the files for packaging
+	@make build LIBC=$@
+	@make package LIBC=$@
 
-cleanbuild:
-	@echo "-> Clean the build folder"
+#####################################################################
+##@ Clean
+
+.PHONY: clean
+clean: ## Clean the latest build
+	@echo "${CCPINK}${CCBOLD}\n-> Clean the build folder\n${CCEND}"
 	@make -C ${PKGNAME}/src clean
 
-cleanall:
-	@echo "-> Remove archive and folder"
+.PHONY: cleanall
+cleanall: ## Clean the downloaded files and folders
+	@echo "${CCPINK}${CCBOLD}\n-> Remove archive and folders\n${CCEND}"
 	@rm -rf ./${PKGNAME}.tar.gz ./${PKGNAME} ./SDK
 
 #####################################################################
-# Release jobs
+##@ Release
 
-release-init:
-	@echo "-> Clear previous release folders..."
+.PHONY: release
+release: release-init newlib clean clib4 clean archive ## Build and create the release
+
+.PHONY: release-init
+release-init: ## Prepare the re folders
+	@echo "${CCPINK}${CCBOLD}\n-> Clear previous release folders...\n${CCEND}"
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/common/include/lua54
@@ -46,39 +76,24 @@ release-init:
 	@cp -r ${PKGNAME}/doc ./SDK/local/Documentation/lua54/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/lua54/
 
-newlib:
-	@echo "-> Building $@ based libraries..."
-	@make LIBC=$@
-	@mkdir -p ./SDK/local/$@/lib
-	@mkdir -p ./SDK/local/$@/bin
-	@cp ./${PKGNAME}/src/liblua.a ./SDK/local/$@/lib/liblua54.a
-	@cp ./${PKGNAME}/src/lua ./${PKGNAME}/src/luac \
-		./SDK/local/$@/bin/
-	@cp ./${PKGNAME}/src/lua.h ./${PKGNAME}/src/lua.hpp \
+.PHONY: package
+package:
+	@echo "${CCPINK}${CCBOLD}\n-> Packaging ${LIBC} based libraries...\n${CCEND}"
+	@mkdir -p ./SDK/local/${LIBC}/lib
+	@mkdir -p ./SDK/local/${LIBC}/bin
+
+ifneq ($(LIBC),newlib)
+	@cp ./${PKGNAME}/src/lauxlib.h ./${PKGNAME}/src/lua.h \
+		./${PKGNAME}/src/lua.hpp \
 		./${PKGNAME}/src/luaconf.h ./${PKGNAME}/src/lualib.h \
 		./SDK/local/common/include/lua54/
-
-clib2:
-	@echo "-> Building $@ based libraries..."
-	@make LIBC=$@
-	@mkdir -p ./SDK/local/$@/lib
-	@mkdir -p ./SDK/local/$@/bin
-	@cp ./${PKGNAME}/src/liblua.a ./SDK/local/$@/lib/liblua54.a
+endif
+	@cp ./${PKGNAME}/src/liblua.a ./SDK/local/${LIBC}/lib/liblua54.a
 	@cp ./${PKGNAME}/src/lua ./${PKGNAME}/src/luac \
-		./SDK/local/$@/bin/
+		./SDK/local/${LIBC}/bin/
 
-clib4:
-	@echo "-> Building $@ based libraries..."
-	@make LIBC=$@
-	@mkdir -p ./SDK/local/$@/lib
-	@mkdir -p ./SDK/local/$@/bin
-	@cp ./${PKGNAME}/src/liblua.a ./SDK/local/$@/lib/liblua54.a
-	@cp ./${PKGNAME}/src/lua ./${PKGNAME}/src/luac \
-		./SDK/local/$@/bin/
-
-archive:
-	@echo "-> Creating the lha release file..."
+.PHONY: archive
+archive: ## Create the release archive
+	@echo "${CCPINK}${CCBOLD}\n-> Creating the lha release file...\n${CCEND}"
 	@rm -f ./${PKGNAME}.lha
 	@lha aq ./${PKGNAME}.lha ./SDK/
-
-release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive
