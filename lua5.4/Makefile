@@ -96,4 +96,4 @@ endif
 archive: ## Create the release archive
 	@echo "${CCPINK}${CCBOLD}\n-> Creating the lha release file...\n${CCEND}"
 	@rm -f ./${PKGNAME}.lha
-	@lha aq ./${PKGNAME}.lha ./SDK/
+	@lha aq ./${PKGNAME}.lha ./SDK/ ./AutoInstall

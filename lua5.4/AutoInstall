@@ -1,0 +1,8 @@
+Delete SDK:local/clib4/bin/lua#? QUIET
+Delete SDK:local/newlib/bin/lua#? QUIET
+Delete SDK:local/clib4/lib/liblua#? QUIET
+Delete SDK:local/newlib/lib/liblua#? QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
+cd SDK:local/newlib/lib
+MakeLink liblua.a liblua54.a SOFT
