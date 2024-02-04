@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=74.1
+LIB_VERSION=72.1
 LIBC?=newlib
 
 PKGNAME=icu-${LIB_VERSION}
@@ -12,10 +12,10 @@ all: build
 
 download:
 	@echo "-> Download archive ${PKGNAME}"
-	@curl -fsSL "https://github.com/unicode-org/icu/archive/refs/tags/release-74-1.tar.gz" -o ${PKGNAME}.tar.gz && \
+	@curl -fsSL "https://github.com/unicode-org/icu/archive/refs/tags/release-72-1.tar.gz" -o ${PKGNAME}.tar.gz && \
 	echo "-> Extract archive" && \
 	tar xzpf ${PKGNAME}.tar.gz && \
-	mv icu-release-74-1 icu-release
+	mv icu-release-72-1 icu-release
 
 init: download buildLinux
 
@@ -32,7 +32,7 @@ buildLinux:
 		sh ../runConfigureICU Linux/gcc && \
 	make -j$(shell nproc) && \
 	cp ../config/mh-linux ../config/mh-unknown
-
+# -D__USE_AMIGAOS_NAMESPACE__
 build:
 	@mkdir -p icu-release/icu4c/source/buildAmigaOS4 && \
 	cd icu-release/icu4c/source/buildAmigaOS4 && \
@@ -50,7 +50,7 @@ build:
 		--disable-dyload   \
 		--enable-release   \
 		--disable-debug    \
-		--disable-tests     \
+		--enable-tests     \
 		--enable-samples   \
 		--disable-extras   \
 		--enable-layoutex  \
@@ -69,7 +69,7 @@ buildCompilationArchive:
 	@echo "-> Copy the necessary files"
 	@cp -r ./icu-release/icu4c/source/buildAmigaOS4/lib \
 		./icu-release/icu4c/source/buildAmigaOS4/bin \
-		./icu-release/icu4c/source/buildAmigaOS4/data/out/build/icudt74b \
+		./icu-release/icu4c/source/buildAmigaOS4/data/out/build/icudt72b \
 		./icu-release/icu4c/source/buildAmigaOS4/data/out/tmp/icudata.lst \
 		./icu-release/icu4c/source/buildAmigaOS4/data/icupkg.inc \
 		./icu-release/icu4c/source/buildAmigaOS4/common \
@@ -80,12 +80,12 @@ buildCompilationArchive:
 	@sed -i 's,ppc-amigaos-,,g' ./icu_compile_in_amiga_${LIBC}/icupkg.inc && \
 	sed -i 's,-I../../common,-Iinclude/common,' ./icu_compile_in_amiga_${LIBC}/icupkg.inc && \
 	sed -i 's,-I../common,-Icommon,' ./icu_compile_in_amiga_${LIBC}/icupkg.inc && \
-	echo "bin/pkgdata -O icupkg.inc -c -s icudt74b -d _OUT -e icudt74  -T _TMP -p icudt74b -m static -r 74.1 -L icudata_${C_LIB} icudata.lst" > \
+	echo "bin/pkgdata -O icupkg.inc -c -s icudt72b -d _OUT -e icudt72  -T _TMP -p icudt72b -m static -r 72.1 -L icudata_${LIBC} icudata.lst" > \
 		./icu_compile_in_amiga_${LIBC}/amigaRunMe && \
 	chmod +x ./icu_compile_in_amiga_${LIBC}/amigaRunMe
 
 	@echo "-> Create the archive"
-	@lha aq ./icu_compile_in_amiga_${LIBC}.lha ./icu_compile_in_amiga_${LIBC}
+	@lha aq ./icu_${LIB_VERSION}_compile_in_amiga_${LIBC}.lha ./icu_compile_in_amiga_${LIBC}
 
 
 
@@ -98,64 +98,4 @@ cleanbuild:
 
 cleanall:
 	@echo "-> Remove archive and folder"
-# @rm -rf ./${PKGNAME}.tar.gz ./icu-release ./SDK
-
-#####################################################################
-# Release jobs
-
-# release-init:
-# 	@echo "-> Clear previous release folders..."
-# 	@rm -rf ./SDK
-# 	@echo "-> Create release folders..."
-# 	@mkdir -p ./SDK/local/common/include/mpfr
-# 	@mkdir -p ./SDK/local/common/examples/mpfr
-# 	@mkdir -p ./SDK/local/Documentation/mpfr
-# 	@cp ${PKGNAME}/AUTHORS* ./SDK/local/Documentation/mpfr/
-# 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/mpfr/
-# 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/mpfr/
-
-# newlib:
-# 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@mkdir -p ./SDK/local/$@/lib
-# 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-# 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
-# 		./${PKGNAME}/src/.libs/libmpfr.lai \
-# 		./${PKGNAME}/src/.libs/libmpfr.so \
-# 		./${PKGNAME}/src/libmpfr.la \
-# 		./SDK/local/$@/lib/
-# 	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
-# 	@cp ./${PKGNAME}/src/generic/*.h ./SDK/local/common/include/mpfr/
-# 	@cp ./${PKGNAME}/examples/* ./SDK/local/common/examples/mpfr/
-# 	@cp ./${PKGNAME}/m4/*.m4 ./SDK/local/Documentation/mpfr/
-
-# clib2:
-# 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@mkdir -p ./SDK/local/$@/lib
-# 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-# 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
-# 		./${PKGNAME}/src/.libs/libmpfr.lai \
-# 		./${PKGNAME}/src/.libs/libmpfr.so \
-# 		./${PKGNAME}/src/libmpfr.la \
-# 		./SDK/local/$@/lib/
-# 	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
-
-# clib4:
-# 	@echo "-> Building $@ based libraries..."
-# 	@make LIBC=$@
-# 	@mkdir -p ./SDK/local/$@/lib
-# 	@mkdir -p ./SDK/local/$@/lib/pkgconfig
-# 	@cp ./${PKGNAME}/src/.libs/libmpfr.a \
-# 		./${PKGNAME}/src/.libs/libmpfr.lai \
-# 		./${PKGNAME}/src/.libs/libmpfr.so \
-# 		./${PKGNAME}/src/libmpfr.la \
-# 		./SDK/local/$@/lib/
-# 	@cp ./${PKGNAME}/mpfr.pc ./SDK/local/$@/lib/pkgconfig/
-
-# archive:
-# 	@echo "-> Creating the lha release file..."
-# 	@rm -f ./${PKGNAME}.lha
-# 	@lha aq ./${PKGNAME}.lha ./SDK/
-
-# release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive
+	@rm -rf ./${PKGNAME}.tar.gz ./icu-release ./SDK
