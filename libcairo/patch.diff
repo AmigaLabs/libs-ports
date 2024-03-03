@@ -1,0 +1,14 @@
+diff --git a/cairo-1.14.10/test/pdiff/pdiff.h b/cairo-1.14.10/test/pdiff/pdiff.h
+index 30fec06..2abefb4 100644
+--- a/cairo-1.14.10/test/pdiff/pdiff.h
++++ b/cairo-1.14.10/test/pdiff/pdiff.h
+@@ -19,7 +19,9 @@
+ 
+ #include <cairo.h>
+ 
++#if !defined(__bool_true_false_are_defined)
+ typedef int bool;
++#endif
+ #ifndef true
+ #define true 1
+ #endif
