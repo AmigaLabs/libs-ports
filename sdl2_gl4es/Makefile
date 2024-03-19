@@ -3,7 +3,7 @@
 # make build LIBC=clib4
 # 
 
-LIB_VERSION=2.28.4
+LIB_VERSION=2.30.1-release2
 LIBC?=newlib
 DEBUG=
 
@@ -18,7 +18,7 @@ download:
 	@curl -fsSLk "https://github.com/AmigaPorts/SDL-2.0/archive/refs/tags/v${LIB_VERSION}-amigaos4.tar.gz" -o ${PKGNAME}.tar.gz && \
 		echo "${CCPINK}${CCBOLD}\n-> Extract archive\n${CCEND}" && \
 		tar xzpf ${PKGNAME}.tar.gz && \
-		mv ./SDL-2.0-${LIB_VERSION}-amigaos4 ${PKGNAME}
+		mv ./SDL-${LIB_VERSION}-amigaos4 ${PKGNAME}
 
 #####################################################################
 ##@ Build
@@ -29,7 +29,7 @@ init: download patch ## Download the archive and initialize the build
 .PHONY: patch
 patch:
 	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
-	@patch -s -p0 < ./patch.diff
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 	@cp ./files/* ${PKGNAME}/src/video/amigaos4/
 
 .PHONY: build
@@ -94,10 +94,10 @@ ifneq ($(DEBUG),debug)
 
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es.a
 	@cp ./${PKGNAME}/libSDL2_test.a ./SDK/local/${LIBC}/lib/libSDL2_test_gl4es.a
-	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_gl4es.so
+	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_gl4es.so
 else
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es_debug.a
-	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_gl4es_debug.so
+	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_gl4es_debug.so
 endif
 
 .PHONY: archive
