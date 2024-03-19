@@ -12,6 +12,9 @@ PKGNAME=sdl2-${LIB_VERSION}
 include ../_common/help.mk
 include ../_common/checks.mk
 
+MAJOR = $(word 1, $(subst ., ,$(LIB_VERSION)))
+MINOR = $(word 2, $(subst ., ,$(LIB_VERSION)))
+
 .PHONY: download
 download:
 	@echo "${CCPINK}${CCBOLD}\n-> Download archive ${PKGNAME}\n${CCEND}"
@@ -94,10 +97,10 @@ ifneq ($(DEBUG),debug)
 
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es.a
 	@cp ./${PKGNAME}/libSDL2_test.a ./SDK/local/${LIBC}/lib/libSDL2_test_gl4es.a
-	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_gl4es.so
+	@cp ./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so ./SDK/local/${LIBC}/lib/libSDL2-$(MAJOR).$(MINOR)_gl4es.so
 else
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_gl4es_debug.a
-	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_gl4es_debug.so
+	@cp ./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so ./SDK/local/${LIBC}/lib/libSDL2-$(MAJOR).$(MINOR)_gl4es_debug.so
 endif
 
 .PHONY: archive

@@ -12,6 +12,9 @@ PKGNAME=sdl2-${LIB_VERSION}
 include ../_common/help.mk
 include ../_common/checks.mk
 
+MAJOR = $(word 1, $(subst ., ,$(LIB_VERSION)))
+MINOR = $(word 2, $(subst ., ,$(LIB_VERSION)))
+
 .PHONY: download
 download:
 ifeq ($(LIB_VERSION),edge)
@@ -95,11 +98,11 @@ ifneq ($(DEBUG),debug)
 	@mkdir -p ./SDK/local/${LIBC}/include/SDL2
 	@cp -r ${PKGNAME}/include/* ./SDK/local/${LIBC}/include/SDL2/
 	@cp ./${PKGNAME}/libSDL2.a ./${PKGNAME}/libSDL2_test.a \
-		./${PKGNAME}/libSDL2-2.30.so \
+		./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so \
 		./SDK/local/${LIBC}/lib/
 else
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_debug.a
-	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_debug.so
+	@cp ./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so ./SDK/local/${LIBC}/lib/libSDL2-$(MAJOR).$(MINOR)_debug.so
 endif
 
 .PHONY: archive
