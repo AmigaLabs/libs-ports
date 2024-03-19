@@ -8,6 +8,9 @@ This makefile can be used to compile the above library and create a new release 
 - newlib
 - clib4
 
+## Remarks
+Make sure `local/clib4/include/GL` is removed or renamed, otherwise clib4 libraries will fail to compile.
+
 ## How to compile
 ```
 make init
