@@ -3,7 +3,7 @@
 # make build LIBC=clib4
 # 
 
-LIB_VERSION=2.28.4
+LIB_VERSION=2.30.1-release2
 LIBC?=newlib
 DEBUG=
 
@@ -14,11 +14,16 @@ include ../_common/checks.mk
 
 .PHONY: download
 download:
+ifeq ($(LIB_VERSION),edge)
+	@echo "${CCPINK}${CCBOLD}\n-> Cloning sdl2 repository ${PKGNAME}\n${CCEND}"
+	@git clone https://github.com/AmigaPorts/SDL.git ${PKGNAME} -b SDL2 --depth 1
+else
 	@echo "${CCPINK}${CCBOLD}\n-> Download archive ${PKGNAME}\n${CCEND}"
 	@curl -fsSLk "https://github.com/AmigaPorts/SDL-2.0/archive/refs/tags/v${LIB_VERSION}-amigaos4.tar.gz" -o ${PKGNAME}.tar.gz && \
 		echo "${CCPINK}${CCBOLD}\n-> Extract archive\n${CCEND}" && \
 		tar xzpf ${PKGNAME}.tar.gz && \
-		mv ./SDL-2.0-${LIB_VERSION}-amigaos4 ${PKGNAME}
+		mv ./SDL-${LIB_VERSION}-amigaos4 ${PKGNAME}
+endif
 
 #####################################################################
 ##@ Build
@@ -29,7 +34,7 @@ init: download patch ## Download the archive and initialize the build
 .PHONY: patch
 patch:
 	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
-	@patch -s -p0 < ./patch.diff
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)
@@ -90,11 +95,11 @@ ifneq ($(DEBUG),debug)
 	@mkdir -p ./SDK/local/${LIBC}/include/SDL2
 	@cp -r ${PKGNAME}/include/* ./SDK/local/${LIBC}/include/SDL2/
 	@cp ./${PKGNAME}/libSDL2.a ./${PKGNAME}/libSDL2_test.a \
-		./${PKGNAME}/libSDL2-2.28.so \
+		./${PKGNAME}/libSDL2-2.30.so \
 		./SDK/local/${LIBC}/lib/
 else
 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_debug.a
-	@cp ./${PKGNAME}/libSDL2-2.28.so ./SDK/local/${LIBC}/lib/libSDL2-2.28_debug.so
+	@cp ./${PKGNAME}/libSDL2-2.30.so ./SDK/local/${LIBC}/lib/libSDL2-2.30_debug.so
 endif
 
 .PHONY: archive
