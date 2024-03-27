@@ -1,0 +1,326 @@
+diff -ruN openssl-3.2.1/apps/ca.c openssl-3.2.1-patched/apps/ca.c
+--- openssl-3.2.1/apps/ca.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/apps/ca.c	2024-03-27 20:24:19.420311067 +0000
+@@ -26,7 +26,7 @@
+ #ifndef W_OK
+ # ifdef OPENSSL_SYS_VMS
+ #  include <unistd.h>
+-# elif !defined(OPENSSL_SYS_VXWORKS) && !defined(OPENSSL_SYS_WINDOWS) && !defined(OPENSSL_SYS_TANDEM)
++# elif !defined(OPENSSL_SYS_VXWORKS) && !defined(OPENSSL_SYS_WINDOWS) && !defined(OPENSSL_SYS_TANDEM) && !defined(OPENSSL_SYS_AMIGAOS4)
+ #  include <sys/file.h>
+ # endif
+ #endif
+diff -ruN openssl-3.2.1/apps/include/http_server.h openssl-3.2.1-patched/apps/include/http_server.h
+--- openssl-3.2.1/apps/include/http_server.h	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/apps/include/http_server.h	2024-03-27 20:25:16.767046728 +0000
+@@ -14,7 +14,7 @@
+ # include "log.h"
+ 
+ # ifndef HAVE_FORK
+-#  if defined(OPENSSL_SYS_VMS) || defined(OPENSSL_SYS_WINDOWS)
++#  if defined(OPENSSL_SYS_VMS) || defined(OPENSSL_SYS_WINDOWS) || defined(OPENSSL_SYS_AMIGAOS4)
+ #   define HAVE_FORK 0
+ #  else
+ #   define HAVE_FORK 1
+diff -ruN openssl-3.2.1/apps/speed.c openssl-3.2.1-patched/apps/speed.c
+--- openssl-3.2.1/apps/speed.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/apps/speed.c	2024-03-27 20:24:45.470342409 +0000
+@@ -84,7 +84,7 @@
+ #include <openssl/modes.h>
+ 
+ #ifndef HAVE_FORK
+-# if defined(OPENSSL_SYS_VMS) || defined(OPENSSL_SYS_WINDOWS) || defined(OPENSSL_SYS_VXWORKS)
++# if defined(OPENSSL_SYS_VMS) || defined(OPENSSL_SYS_WINDOWS) || defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_AMIGAOS4)
+ #  define HAVE_FORK 0
+ # else
+ #  define HAVE_FORK 1
+diff -ruN openssl-3.2.1/crypto/asn1/a_time.c openssl-3.2.1-patched/crypto/asn1/a_time.c
+--- openssl-3.2.1/crypto/asn1/a_time.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/asn1/a_time.c	2024-03-27 20:29:29.421558431 +0000
+@@ -22,6 +22,10 @@
+ #include <openssl/asn1t.h>
+ #include "asn1_local.h"
+ 
++#ifdef __amigaos4__
++#include <dos.h>
++#endif
++
+ IMPLEMENT_ASN1_MSTRING(ASN1_TIME, B_ASN1_TIME)
+ 
+ IMPLEMENT_ASN1_FUNCTIONS(ASN1_TIME)
+@@ -595,9 +599,9 @@
+ }
+ 
+ /*
+- * tweak for Windows
++ * tweak for Windows and AmigaOS 4
+  */
+-#ifdef WIN32
++#if defined(WIN32) || defined(__amigaos4__)
+ # define timezone _timezone
+ #endif
+ 
+diff -ruN openssl-3.2.1/crypto/bio/bio_local.h openssl-3.2.1-patched/crypto/bio/bio_local.h
+--- openssl-3.2.1/crypto/bio/bio_local.h	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/bio/bio_local.h	2024-03-27 20:30:51.992244186 +0000
+@@ -34,6 +34,13 @@
+ #  error openssl/bio.h included before bio_local.h
+ # endif
+ 
++/*
++ * Undefine AF_UNIX on systems that define it but don't support it.
++ */
++# if defined(OPENSSL_SYS_AMIGAOS4)
++#  undef AF_UNIX
++# endif
++
+ # ifdef AI_PASSIVE
+ 
+ /*
+diff -ruN openssl-3.2.1/crypto/bio/bss_dgram.c openssl-3.2.1-patched/crypto/bio/bss_dgram.c
+--- openssl-3.2.1/crypto/bio/bss_dgram.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/bio/bss_dgram.c	2024-03-27 20:32:54.066461938 +0000
+@@ -113,7 +113,7 @@
+ #   else
+ #     define BIO_CMSG_ALLOC_LEN_1   0
+ #   endif
+-#   if defined(IP_PKTINFO)
++#   if defined(IP_PKTINFO) && !defined(__amigaos4__)
+ #     define BIO_CMSG_ALLOC_LEN_2   BIO_CMSG_SPACE(sizeof(struct in_pktinfo))
+ #   else
+ #     define BIO_CMSG_ALLOC_LEN_2   0
+@@ -1098,7 +1098,7 @@
+             if (cmsg->cmsg_level != IPPROTO_IP)
+                 continue;
+ 
+-#   if defined(IP_PKTINFO)
++#   if defined(IP_PKTINFO) && !defined(__amigaos4__)
+             if (cmsg->cmsg_type != IP_PKTINFO)
+                 continue;
+ 
+@@ -1160,7 +1160,7 @@
+ #  endif
+ 
+     if (af == AF_INET) {
+-#  if defined(IP_PKTINFO)
++#  if defined(IP_PKTINFO) && !defined(__amigaos4__)
+         struct in_pktinfo *info;
+ 
+ #   if defined(OPENSSL_SYS_WINDOWS)
+diff -ruN openssl-3.2.1/crypto/conf/conf_mod.c openssl-3.2.1-patched/crypto/conf/conf_mod.c
+--- openssl-3.2.1/crypto/conf/conf_mod.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/conf/conf_mod.c	2024-03-27 20:34:21.880352540 +0000
+@@ -634,7 +634,7 @@
+ 
+     if ((file = ossl_safe_getenv("OPENSSL_CONF")) != NULL)
+         return OPENSSL_strdup(file);
+-
++#ifndef __amigaos4__
+     t = X509_get_default_cert_area();
+ #ifndef OPENSSL_SYS_VMS
+     sep = "/";
+@@ -647,6 +647,9 @@
+     BIO_snprintf(file, size, "%s%s%s", t, sep, OPENSSL_CONF);
+ 
+     return file;
++#else
++    return OPENSSL_strdup("AmiSSL:" OPENSSL_CONF);
++#endif
+ }
+ 
+ /*
+diff -ruN openssl-3.2.1/crypto/dso/dso_dlfcn.c openssl-3.2.1-patched/crypto/dso/dso_dlfcn.c
+--- openssl-3.2.1/crypto/dso/dso_dlfcn.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/dso/dso_dlfcn.c	2024-03-27 20:35:09.887300309 +0000
+@@ -30,7 +30,7 @@
+ #  if defined(__SCO_VERSION__) || defined(_SCO_ELF) || \
+      (defined(__osf__) && !defined(RTLD_NEXT))     || \
+      (defined(__OpenBSD__) && !defined(RTLD_SELF)) || \
+-     defined(__ANDROID__) || defined(__TANDEM)
++     defined(__ANDROID__) || defined(__TANDEM) || defined(__amigaos4__)
+ #   undef HAVE_DLINFO
+ #  endif
+ # endif
+diff -ruN openssl-3.2.1/crypto/uid.c openssl-3.2.1-patched/crypto/uid.c
+--- openssl-3.2.1/crypto/uid.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/crypto/uid.c	2024-03-27 20:27:32.370543170 +0000
+@@ -10,7 +10,7 @@
+ #include <openssl/crypto.h>
+ #include <openssl/opensslconf.h>
+ 
+-#if defined(OPENSSL_SYS_WIN32) || defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_UEFI) || defined(__wasi__)
++#if defined(OPENSSL_SYS_WIN32) || defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_UEFI) || defined(__wasi__) || defined(OPENSSL_SYS_AMIGAOS4)
+ 
+ int OPENSSL_issetugid(void)
+ {
+diff -ruN openssl-3.2.1/fuzz/client.c openssl-3.2.1-patched/fuzz/client.c
+--- openssl-3.2.1/fuzz/client.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/fuzz/client.c	2024-03-27 20:35:42.724150664 +0000
+@@ -32,7 +32,7 @@
+  * in things not being fully reproducible and have a slightly
+  * different coverage.
+  */
+-#if !defined(_WIN32)
++#if !defined(_WIN32) && !defined(__amigaos4__)
+ time_t time(time_t *t) TIME_IMPL(t)
+ #endif
+ 
+diff -ruN openssl-3.2.1/fuzz/server.c openssl-3.2.1-patched/fuzz/server.c
+--- openssl-3.2.1/fuzz/server.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/fuzz/server.c	2024-03-27 20:36:09.260961027 +0000
+@@ -485,7 +485,7 @@
+  * in things not being fully reproducible and have a slightly
+  * different coverage.
+  */
+-#if !defined(_WIN32)
++#if !defined(_WIN32) && !defined(__amigaos4__)
+ time_t time(time_t *t) TIME_IMPL(t)
+ #endif
+ 
+diff -ruN openssl-3.2.1/include/crypto/rand.h openssl-3.2.1-patched/include/crypto/rand.h
+--- openssl-3.2.1/include/crypto/rand.h	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/include/crypto/rand.h	2024-03-27 20:37:21.587999551 +0000
+@@ -40,7 +40,12 @@
+  * set this to a comma-separated list of 'random' device files to try out. By
+  * default, we will try to read at least one of these files
+  */
++#ifdef __amigaos4__
++# define DEVRANDOM "RANDOM:"
++#else
+ # define DEVRANDOM "/dev/urandom", "/dev/random", "/dev/hwrng", "/dev/srandom"
++#endif
++
+ # if defined(__linux) && !defined(__ANDROID__)
+ #  ifndef DEVRANDOM_WAIT
+ #   define DEVRANDOM_WAIT   "/dev/random"
+diff -ruN openssl-3.2.1/include/internal/common.h openssl-3.2.1-patched/include/internal/common.h
+--- openssl-3.2.1/include/internal/common.h	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/include/internal/common.h	2024-03-27 20:38:42.928386954 +0000
+@@ -80,12 +80,24 @@
+ 
+ # define OPENSSL_CONF             "openssl.cnf"
+ 
+-# ifndef OPENSSL_SYS_VMS
++# if !defined(OPENSSL_SYS_VMS) && !defined(OPENSSL_SYS_AMIGAOS4)
+ #  define X509_CERT_AREA          OPENSSLDIR
+ #  define X509_CERT_DIR           OPENSSLDIR "/certs"
+ #  define X509_CERT_FILE          OPENSSLDIR "/cert.pem"
+ #  define X509_PRIVATE_DIR        OPENSSLDIR "/private"
+ #  define CTLOG_FILE              OPENSSLDIR "/ct_log_list.cnf"
++#elif defined(OPENSSL_SYS_AMIGAOS4)
++#  undef OPENSSLDIR
++#  undef ENGINESDIR
++#  undef MODULESDIR
++#  define OPENSSLDIR              "AMISSL:"
++#  define X509_CERT_AREA          OPENSSLDIR
++#  define X509_CERT_DIR           OPENSSLDIR "Certs"
++#  define X509_CERT_FILE          OPENSSLDIR "cert.pem"
++#  define X509_PRIVATE_DIR        OPENSSLDIR "private"
++#  define CTLOG_FILE              OPENSSLDIR "ct_log_list.cnf"
++#  define ENGINESDIR              OPENSSLDIR "Engines"
++#  define MODULESDIR              OPENSSLDIR "Modules"
+ # else
+ #  define X509_CERT_AREA          "OSSL$DATAROOT:[000000]"
+ #  define X509_CERT_DIR           "OSSL$DATAROOT:[CERTS]"
+@@ -206,6 +218,11 @@
+             && path[1] != '.' && path[1] != '-'
+             && path[1] != ']' && path[1] != '>'))
+         return 1;
++# elif defined(__amigaos4__)
++    if (strchr(path, ':') != NULL)
++        return 1;
++    else
++        return 0;
+ # elif defined _WIN32
+     if (path[0] == '\\'
+         || (path[0] != '\0' && path[1] == ':'))
+diff -ruN openssl-3.2.1/include/internal/sockets.h openssl-3.2.1-patched/include/internal/sockets.h
+--- openssl-3.2.1/include/internal/sockets.h	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/include/internal/sockets.h	2024-03-27 20:40:03.455409607 +0000
+@@ -16,7 +16,7 @@
+ # if defined(OPENSSL_SYS_VXWORKS) || defined(OPENSSL_SYS_UEFI)
+ #  define NO_SYS_PARAM_H
+ # endif
+-# ifdef WIN32
++# if defined(WIN32) || defined(__amigaos4__)
+ #  define NO_SYS_UN_H
+ # endif
+ # ifdef OPENSSL_SYS_VMS
+diff -ruN openssl-3.2.1/providers/implementations/rands/seeding/rand_unix.c openssl-3.2.1-patched/providers/implementations/rands/seeding/rand_unix.c
+--- openssl-3.2.1/providers/implementations/rands/seeding/rand_unix.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/providers/implementations/rands/seeding/rand_unix.c	2024-03-27 20:41:30.255767163 +0000
+@@ -354,7 +354,7 @@
+      * internally. So we need to check errno for ENOSYS
+      */
+ #  if !defined(__DragonFly__) && !defined(__NetBSD__)
+-#    if defined(__GNUC__) && __GNUC__>=2 && defined(__ELF__) && !defined(__hpux)
++#    if defined(__GNUC__) && __GNUC__>=2 && defined(__ELF__) && !defined(__hpux) && !defined(__amigaos4__)
+     extern int getentropy(void *buffer, size_t length) __attribute__((weak));
+ 
+     if (getentropy != NULL) {
+@@ -513,13 +513,16 @@
+ static int check_random_device(struct random_device *rd)
+ {
+     struct stat st;
+-
++#ifndef __amigaos4__
+     return rd->fd != -1
+            && fstat(rd->fd, &st) != -1
+            && rd->dev == st.st_dev
+            && rd->ino == st.st_ino
+            && ((rd->mode ^ st.st_mode) & ~(S_IRWXU | S_IRWXG | S_IRWXO)) == 0
+            && rd->rdev == st.st_rdev;
++#else
++    return rd->fd != -1;
++#endif
+ }
+ 
+ /*
+@@ -537,7 +540,7 @@
+     /* open the random device ... */
+     if ((rd->fd = open(random_device_paths[n], O_RDONLY)) == -1)
+         return rd->fd;
+-
++#ifndef __amigaos4__
+     /* ... and cache its relevant stat(2) data */
+     if (fstat(rd->fd, &st) != -1) {
+         rd->dev = st.st_dev;
+@@ -548,7 +551,7 @@
+         close(rd->fd);
+         rd->fd = -1;
+     }
+-
++#endif
+     return rd->fd;
+ }
+ 
+diff -ruN openssl-3.2.1/test/drbgtest.c openssl-3.2.1-patched/test/drbgtest.c
+--- openssl-3.2.1/test/drbgtest.c	2024-01-30 13:14:56.000000000 +0000
++++ openssl-3.2.1-patched/test/drbgtest.c	2024-03-27 20:42:48.682737032 +0000
+@@ -34,7 +34,7 @@
+ # endif
+ #endif
+ 
+-#if defined(OPENSSL_SYS_UNIX)
++#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_SYS_AMIGAOS4)
+ # include <sys/types.h>
+ # include <sys/wait.h>
+ # include <unistd.h>
+@@ -277,7 +277,7 @@
+ }
+ 
+ 
+-#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD)
++#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD) && !defined(OPENSSL_SYS_AMIGAOS4)
+ /* number of children to fork */
+ #define DRBG_FORK_COUNT 9
+ /* two results per child, two for the parent */
+@@ -895,7 +895,7 @@
+ int setup_tests(void)
+ {
+     ADD_TEST(test_rand_reseed);
+-#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD)
++#if defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_RAND_SEED_EGD) && !defined(OPENSSL_SYS_AMIGAOS4)
+     ADD_ALL_TESTS(test_rand_fork_safety, RANDOM_SIZE);
+ #endif
+     ADD_TEST(test_rand_prediction_resistance);

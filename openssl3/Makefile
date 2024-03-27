@@ -1,0 +1,120 @@
+# Set the libc to be used with the LIBC argument
+# possible values newlib, clib2, clib4
+# make build LIBC=clib4
+# 
+
+LIB_VERSION=3.2.1
+LIBC?=newlib
+DEBUG=
+
+PKGNAME=openssl-${LIB_VERSION}
+
+include ../_common/help.mk
+include ../_common/checks.mk
+
+.PHONY: download
+download:
+	@echo "${CCPINK}${CCBOLD}\n-> Download archive ${PKGNAME}\n${CCEND}"
+	@curl -fsSLk "https://www.openssl.org/source/openssl-${LIB_VERSION}.tar.gz" -o ${PKGNAME}.tar.gz && \
+		echo "${CCPINK}${CCBOLD}\n-> Extract archive\n${CCEND}" && \
+		tar xzpf ${PKGNAME}.tar.gz
+
+#####################################################################
+##@ Build
+
+.PHONY: init
+init: download patch ## Download the archive and initialize the build
+
+.PHONY: patch
+patch:
+	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
+	@cp -r ./files/* ${PKGNAME}/
+
+.PHONY: build
+build: # Build with specified LIBC=(newlib|clib2|clib4)
+	@echo "${CCPINK}${CCBOLD}\n-> Building ${LIBC} based libraries...\n${CCEND}"
+	@cd ${PKGNAME} && \
+	CC="ppc-amigaos-gcc" \
+	CFLAGS="-mcrt=${LIBC} -O2 -fPIC -DOPENSSL_SYS_AMIGAOS4 -DOPENSSL_NO_UNIX_SOCK" \
+	LDFLAGS="-mcrt=${LIBC}" \
+	PKG_CONFIG_PATH=${SDK_PATH}/local/${LIBC}/lib/pkgconfig \
+	LIBS="-lpthread -athread=native" \
+	./Configure \
+		--openssldir=DEVS:AmiSSL \
+		no-dso \
+		no-engine \
+		no-shared \
+		no-pic \
+		no-threads \
+		ppc-amigaos \
+		--prefix=${SDK_PATH}/local/${LIBC} \
+	&& \
+	sed -i 's/\/usr\/local\/DEVS:AmiSSL/DEVS:AmiSSL/g' ./Makefile && \
+	make update && \
+	make -j$(shell nproc)
+
+.PHONY: newlib clib2 clib4
+newlib: ## Build using newlib crt and prepares the files for packaging
+	@make build LIBC=$@
+	@make package LIBC=$@
+	@make clean
+	@make build LIBC=$@ DEBUG=debug
+	@make package LIBC=$@ DEBUG=debug
+# clib2: ## Build using clib2 crt and prepares the files for packaging
+# 	@make build LIBC=$@
+# 	@make package LIBC=$@
+clib4: ## Build using clib4 crt and prepares the files for packaging
+	@make build LIBC=$@
+	@make package LIBC=$@
+
+#####################################################################
+##@ Clean
+
+.PHONY: clean
+clean: ## Clean the latest build
+	@echo "${CCPINK}${CCBOLD}\n-> Clean the build folder\n${CCEND}"
+	@make -C ${PKGNAME} -f Makefile.amigaos4 clean
+
+.PHONY: cleanall
+cleanall: ## Clean the downloaded files and folders
+	@echo "${CCPINK}${CCBOLD}\n-> Remove archive and folders\n${CCEND}"
+	@rm -rf ./${PKGNAME}.tar.gz ./${PKGNAME} ./SDK
+
+#####################################################################
+##@ Release
+
+# .PHONY: release
+# release: release-init newlib clean clib4 clean archive ## Build and create the release
+
+# .PHONY: release-init
+# release-init: ## Prepare the release folders
+# 	@echo "${CCPINK}${CCBOLD}\n-> Clear previous release folders...\n${CCEND}"
+# 	@rm -rf ./SDK
+
+# 	@echo "${CCPINK}${CCBOLD}\n-> Create release folders...\n${CCEND}"
+# 	@mkdir -p ./SDK/local/Documentation/SDL2
+# 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/SDL2/
+# 	@cp ${PKGNAME}/LICENSE* ./SDK/local/Documentation/SDL2/
+# 	@cp ${PKGNAME}/CREDITS* ./SDK/local/Documentation/SDL2/
+
+# .PHONY: package
+# package:
+# 	@echo "${CCPINK}${CCBOLD}\n-> Packaging ${LIBC} based libraries...\n${CCEND}"
+# 	@mkdir -p ./SDK/local/${LIBC}/lib
+# ifneq ($(DEBUG),debug)
+# 	@mkdir -p ./SDK/local/${LIBC}/include/SDL2
+# 	@cp -r ${PKGNAME}/include/* ./SDK/local/${LIBC}/include/SDL2/
+# 	@cp ./${PKGNAME}/libSDL2.a ./${PKGNAME}/libSDL2_test.a \
+# 		./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so \
+# 		./SDK/local/${LIBC}/lib/
+# else
+# 	@cp ./${PKGNAME}/libSDL2.a ./SDK/local/${LIBC}/lib/libSDL2_debug.a
+# 	@cp ./${PKGNAME}/libSDL2-$(MAJOR).$(MINOR).so ./SDK/local/${LIBC}/lib/libSDL2-$(MAJOR).$(MINOR)_debug.so
+# endif
+
+# .PHONY: archive
+# archive: ## Create the release archive
+# 	@echo "${CCPINK}${CCBOLD}\n-> Creating the lha release file...\n${CCEND}"
+# 	@rm -f ./${PKGNAME}_ogles2.lha
+# 	@lha aq ./${PKGNAME}_ogles2.lha ./SDK/
