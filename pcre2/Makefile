@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=10.42
+LIB_VERSION=10.44
 LIBC?=newlib
 
 PKGNAME=pcre2-${LIB_VERSION}
@@ -26,7 +26,7 @@ init: download patches
 
 patches:
 	@echo "-> Apply the patches"
-	@patch -s -p0 < ./patch-1.diff
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 build:
 	cd ${PKGNAME}/build && \
