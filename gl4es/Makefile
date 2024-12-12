@@ -36,7 +36,7 @@ init: download  ## Download the archive and initialize the build
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)
-	cd ${PKGNAME}/build && \
+	@cd ${PKGNAME}/build && \
 	cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_CROSSCOMPILING=ON \
 		-DCMAKE_TOOLCHAIN_FILE=$(realpath amigaos4.cmake) \
@@ -51,7 +51,7 @@ build: # Build with specified LIBC=(newlib|clib2|clib4)
 	&& \
 	make -j$(shell nproc)
 
-.PHONY: newlib clib2 clib4
+.PHONY: newlib clib4
 newlib: ## Build using newlib crt and prepares the files for packaging
 	@make build LIBC=$@
 	@make package LIBC=$@
