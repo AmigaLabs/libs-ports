@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=5.4.6
+LIB_VERSION=5.4.7
 LIBC?=newlib
 
 PKGNAME=lua-${LIB_VERSION}
@@ -27,7 +27,7 @@ init: download patch
 .PHONY: patch
 patch:
 	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
-	@patch -s -p0 < ./patch.diff
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)

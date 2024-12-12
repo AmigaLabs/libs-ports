@@ -1,0 +1,355 @@
+diff -ruN lua-5.4.7/src/ldo.c lua-5.4.7-patched/src/ldo.c
+--- lua-5.4.7/src/ldo.c	2024-06-13 22:15:09.000000000 +0000
++++ lua-5.4.7-patched/src/ldo.c	2024-12-12 23:26:55.380247034 +0000
+@@ -735,7 +735,7 @@
+ */
+ static void unroll (lua_State *L, void *ud) {
+   CallInfo *ci;
+-  UNUSED(ud);
++  // UNUSED(ud);
+   while ((ci = L->ci) != &L->base_ci) {  /* something in the stack */
+     if (!isLua(ci))  /* C function? */
+       finishCcall(L, ci);  /* complete its execution */
+diff -ruN lua-5.4.7/src/lgc.c lua-5.4.7-patched/src/lgc.c
+--- lua-5.4.7/src/lgc.c	2024-06-13 22:15:09.000000000 +0000
++++ lua-5.4.7-patched/src/lgc.c	2024-12-12 23:26:55.380247034 +0000
+@@ -168,7 +168,7 @@
+ ** its associated empty value is enough to signal that the entry is
+ ** logically empty.
+ */
+-static void clearkey (Node *n) {
++static void clearkey (LUANode *n) {
+   lua_assert(isempty(gval(n)));
+   if (keyiscollectable(n))
+     setdeadkey(n);  /* unused key; remove it */
+@@ -444,7 +444,7 @@
+ ** put it in 'weak' list, to be cleared.
+ */
+ static void traverseweakvalue (global_State *g, Table *h) {
+-  Node *n, *limit = gnodelast(h);
++  LUANode *n, *limit = gnodelast(h);
+   /* if there is array part, assume it may have white values (it is not
+      worth traversing it now just to check) */
+   int hasclears = (h->alimit > 0);
+@@ -494,7 +494,7 @@
+   /* traverse hash part; if 'inv', traverse descending
+      (see 'convergeephemerons') */
+   for (i = 0; i < nsize; i++) {
+-    Node *n = inv ? gnode(h, nsize - 1 - i) : gnode(h, i);
++    LUANode *n = inv ? gnode(h, nsize - 1 - i) : gnode(h, i);
+     if (isempty(gval(n)))  /* entry is empty? */
+       clearkey(n);  /* clear its key */
+     else if (iscleared(g, gckeyN(n))) {  /* key is not marked (yet)? */
+@@ -521,7 +521,7 @@
+ 
+ 
+ static void traversestrongtable (global_State *g, Table *h) {
+-  Node *n, *limit = gnodelast(h);
++  LUANode *n, *limit = gnodelast(h);
+   unsigned int i;
+   unsigned int asize = luaH_realasize(h);
+   for (i = 0; i < asize; i++)  /* traverse array part */
+@@ -725,8 +725,8 @@
+ static void clearbykeys (global_State *g, GCObject *l) {
+   for (; l; l = gco2t(l)->gclist) {
+     Table *h = gco2t(l);
+-    Node *limit = gnodelast(h);
+-    Node *n;
++    LUANode *limit = gnodelast(h);
++    LUANode *n;
+     for (n = gnode(h, 0); n < limit; n++) {
+       if (iscleared(g, gckeyN(n)))  /* unmarked key? */
+         setempty(gval(n));  /* remove entry */
+@@ -744,7 +744,7 @@
+ static void clearbyvalues (global_State *g, GCObject *l, GCObject *f) {
+   for (; l != f; l = gco2t(l)->gclist) {
+     Table *h = gco2t(l);
+-    Node *n, *limit = gnodelast(h);
++    LUANode *n, *limit = gnodelast(h);
+     unsigned int i;
+     unsigned int asize = luaH_realasize(h);
+     for (i = 0; i < asize; i++) {
+@@ -899,7 +899,7 @@
+ 
+ 
+ static void dothecall (lua_State *L, void *ud) {
+-  UNUSED(ud);
++  // UNUSED(ud);
+   luaD_callnoyield(L, L->top.p - 2, 0);
+ }
+ 
+diff -ruN lua-5.4.7/src/lobject.h lua-5.4.7-patched/src/lobject.h
+--- lua-5.4.7/src/lobject.h	2024-06-13 22:15:09.000000000 +0000
++++ lua-5.4.7-patched/src/lobject.h	2024-12-12 23:26:55.380247034 +0000
+@@ -693,10 +693,10 @@
+ ** Nodes for Hash tables: A pack of two TValue's (key-value pairs)
+ ** plus a 'next' field to link colliding entries. The distribution
+ ** of the key's fields ('key_tt' and 'key_val') not forming a proper
+-** 'TValue' allows for a smaller size for 'Node' both in 4-byte
++** 'TValue' allows for a smaller size for 'LUANode' both in 4-byte
+ ** and 8-byte alignments.
+ */
+-typedef union Node {
++typedef union LUANode {
+   struct NodeKey {
+     TValuefields;  /* fields for value */
+     lu_byte key_tt;  /* key type */
+@@ -704,19 +704,19 @@
+     Value key_val;  /* key value */
+   } u;
+   TValue i_val;  /* direct access to node's value as a proper 'TValue' */
+-} Node;
++} LUANode;
+ 
+ 
+ /* copy a value into a key */
+ #define setnodekey(L,node,obj) \
+-	{ Node *n_=(node); const TValue *io_=(obj); \
++	{ LUANode *n_=(node); const TValue *io_=(obj); \
+ 	  n_->u.key_val = io_->value_; n_->u.key_tt = io_->tt_; \
+ 	  checkliveness(L,io_); }
+ 
+ 
+ /* copy a value from a key */
+ #define getnodekey(L,obj,node) \
+-	{ TValue *io_=(obj); const Node *n_=(node); \
++	{ TValue *io_=(obj); const LUANode *n_=(node); \
+ 	  io_->value_ = n_->u.key_val; io_->tt_ = n_->u.key_tt; \
+ 	  checkliveness(L,io_); }
+ 
+@@ -740,8 +740,8 @@
+   lu_byte lsizenode;  /* log2 of size of 'node' array */
+   unsigned int alimit;  /* "limit" of 'array' array */
+   TValue *array;  /* array part */
+-  Node *node;
+-  Node *lastfree;  /* any free position is before this position */
++  LUANode *node;
++  LUANode *lastfree;  /* any free position is before this position */
+   struct Table *metatable;
+   GCObject *gclist;
+ } Table;
+diff -ruN lua-5.4.7/src/ltable.c lua-5.4.7-patched/src/ltable.c
+--- lua-5.4.7/src/ltable.c	2024-06-13 22:15:10.000000000 +0000
++++ lua-5.4.7-patched/src/ltable.c	2024-12-12 23:31:33.163559245 +0000
+@@ -65,7 +65,7 @@
+ ** between 2^MAXHBITS and the maximum size such that, measured in bytes,
+ ** it fits in a 'size_t'.
+ */
+-#define MAXHSIZE	luaM_limitN(1u << MAXHBITS, Node)
++#define MAXHSIZE	luaM_limitN(1u << MAXHBITS, LUANode)
+ 
+ 
+ /*
+@@ -90,7 +90,7 @@
+ 
+ #define dummynode		(&dummynode_)
+ 
+-static const Node dummynode_ = {
++static const LUANode dummynode_ = {
+   {{NULL}, LUA_VEMPTY,  /* value's value and type */
+    LUA_VNIL, 0, {NULL}}  /* key type, next, and key value */
+ };
+@@ -105,7 +105,7 @@
+ ** remainder, which is faster. Otherwise, use an unsigned-integer
+ ** remainder, which uses all bits and ensures a non-negative result.
+ */
+-static Node *hashint (const Table *t, lua_Integer i) {
++static LUANode *hashint (const Table *t, lua_Integer i) {
+   lua_Unsigned ui = l_castS2U(i);
+   if (ui <= cast_uint(INT_MAX))
+     return hashmod(t, cast_int(ui));
+@@ -148,7 +148,7 @@
+ ** returns the 'main' position of an element in a table (that is,
+ ** the index of its hash value).
+ */
+-static Node *mainpositionTV (const Table *t, const TValue *key) {
++static LUANode *mainpositionTV (const Table *t, const TValue *key) {
+   switch (ttypetag(key)) {
+     case LUA_VNUMINT: {
+       lua_Integer i = ivalue(key);
+@@ -186,7 +186,7 @@
+ }
+ 
+ 
+-l_sinline Node *mainpositionfromnode (const Table *t, Node *nd) {
++l_sinline LUANode *mainpositionfromnode (const Table *t, LUANode *nd) {
+   TValue key;
+   getnodekey(cast(lua_State *, NULL), &key, nd);
+   return mainpositionTV(t, &key);
+@@ -213,7 +213,7 @@
+ ** positive does not break anything.  (In particular, 'next' will return
+ ** some other valid item on the table or nil.)
+ */
+-static int equalkey (const TValue *k1, const Node *n2, int deadok) {
++static int equalkey (const TValue *k1, const LUANode *n2, int deadok) {
+   if ((rawtt(k1) != keytt(n2)) &&  /* not the same variants? */
+        !(deadok && keyisdead(n2) && iscollectable(k1)))
+    return 0;  /* cannot be same key */
+@@ -297,7 +297,7 @@
+ ** See explanation about 'deadok' in function 'equalkey'.
+ */
+ static const TValue *getgeneric (Table *t, const TValue *key, int deadok) {
+-  Node *n = mainpositionTV(t, key);
++  LUANode *n = mainpositionTV(t, key);
+   for (;;) {  /* check whether 'key' is somewhere in the chain */
+     if (equalkey(key, n, deadok))
+       return gval(n);  /* that's it */
+@@ -358,7 +358,7 @@
+   }
+   for (i -= asize; cast_int(i) < sizenode(t); i++) {  /* hash part */
+     if (!isempty(gval(gnode(t, i)))) {  /* a non-empty entry? */
+-      Node *n = gnode(t, i);
++      LUANode *n = gnode(t, i);
+       getnodekey(L, s2v(key), n);
+       setobj2s(L, key + 1, gval(n));
+       return 1;
+@@ -458,7 +458,7 @@
+   int ause = 0;  /* elements added to 'nums' (can go to array part) */
+   int i = sizenode(t);
+   while (i--) {
+-    Node *n = &t->node[i];
++    LUANode *n = &t->node[i];
+     if (!isempty(gval(n))) {
+       if (keyisinteger(n))
+         ause += countint(keyival(n), nums);
+@@ -479,7 +479,7 @@
+ */
+ static void setnodevector (lua_State *L, Table *t, unsigned int size) {
+   if (size == 0) {  /* no elements to hash part? */
+-    t->node = cast(Node *, dummynode);  /* use common 'dummynode' */
++    t->node = cast(LUANode *, dummynode);  /* use common 'dummynode' */
+     t->lsizenode = 0;
+     t->lastfree = NULL;  /* signal that it is using dummy node */
+   }
+@@ -489,9 +489,9 @@
+     if (lsize > MAXHBITS || (1u << lsize) > MAXHSIZE)
+       luaG_runerror(L, "table overflow");
+     size = twoto(lsize);
+-    t->node = luaM_newvector(L, size, Node);
++    t->node = luaM_newvector(L, size, LUANode);
+     for (i = 0; i < cast_int(size); i++) {
+-      Node *n = gnode(t, i);
++      LUANode *n = gnode(t, i);
+       gnext(n) = 0;
+       setnilkey(n);
+       setempty(gval(n));
+@@ -509,7 +509,7 @@
+   int j;
+   int size = sizenode(ot);
+   for (j = 0; j < size; j++) {
+-    Node *old = gnode(ot, j);
++    LUANode *old = gnode(ot, j);
+     if (!isempty(gval(old))) {
+       /* doesn't need barrier/invalidate cache, as entry was
+          already present in the table */
+@@ -526,8 +526,8 @@
+ */
+ static void exchangehashpart (Table *t1, Table *t2) {
+   lu_byte lsizenode = t1->lsizenode;
+-  Node *node = t1->node;
+-  Node *lastfree = t1->lastfree;
++  LUANode *node = t1->node;
++  LUANode *lastfree = t1->lastfree;
+   t1->lsizenode = t2->lsizenode;
+   t1->node = t2->node;
+   t1->lastfree = t2->lastfree;
+@@ -642,7 +642,7 @@
+ }
+ 
+ 
+-static Node *getfreepos (Table *t) {
++static LUANode *getfreepos (Table *t) {
+   if (!isdummy(t)) {
+     while (t->lastfree > t->node) {
+       t->lastfree--;
+@@ -664,7 +664,7 @@
+ */
+ static void luaH_newkey (lua_State *L, Table *t, const TValue *key,
+                                                  TValue *value) {
+-  Node *mp;
++  LUANode *mp;
+   TValue aux;
+   if (l_unlikely(ttisnil(key)))
+     luaG_runerror(L, "table index is nil");
+@@ -682,8 +682,8 @@
+     return;  /* do not insert nil values */
+   mp = mainpositionTV(t, key);
+   if (!isempty(gval(mp)) || isdummy(t)) {  /* main position is taken? */
+-    Node *othern;
+-    Node *f = getfreepos(t);  /* get a free place */
++    LUANode *othern;
++    LUANode *f = getfreepos(t);  /* get a free place */
+     if (f == NULL) {  /* cannot find a free place? */
+       rehash(L, t, key);  /* grow table */
+       /* whatever called 'newkey' takes care of TM cache */
+@@ -752,7 +752,7 @@
+     return &t->array[key - 1];
+   }
+   else {  /* key is not in the array part; check the hash */
+-    Node *n = hashint(t, key);
++    LUANode *n = hashint(t, key);
+     for (;;) {  /* check whether 'key' is somewhere in the chain */
+       if (keyisinteger(n) && keyival(n) == key)
+         return gval(n);  /* that's it */
+@@ -771,7 +771,7 @@
+ ** search function for short strings
+ */
+ const TValue *luaH_getshortstr (Table *t, TString *key) {
+-  Node *n = hashstr(t, key);
++  LUANode *n = hashstr(t, key);
+   lua_assert(key->tt == LUA_VSHRSTR);
+   for (;;) {  /* check whether 'key' is somewhere in the chain */
+     if (keyisshrstr(n) && eqshrstr(keystrval(n), key))
+@@ -988,7 +988,7 @@
+ 
+ /* export these functions for the test library */
+ 
+-Node *luaH_mainposition (const Table *t, const TValue *key) {
++LUANode *luaH_mainposition (const Table *t, const TValue *key) {
+   return mainpositionTV(t, key);
+ }
+ 
+diff -ruN lua-5.4.7/src/ltable.h lua-5.4.7-patched/src/ltable.h
+--- lua-5.4.7/src/ltable.h	2024-06-13 22:15:10.000000000 +0000
++++ lua-5.4.7-patched/src/ltable.h	2024-12-12 23:26:55.380247034 +0000
+@@ -31,8 +31,8 @@
+ #define allocsizenode(t)	(isdummy(t) ? 0 : sizenode(t))
+ 
+ 
+-/* returns the Node, given the value of a table entry */
+-#define nodefromval(v)	cast(Node *, (v))
++/* returns the LUANode, given the value of a table entry */
++#define nodefromval(v)	cast(LUANode *, (v))
+ 
+ 
+ LUAI_FUNC const TValue *luaH_getint (Table *t, lua_Integer key);
+@@ -56,7 +56,7 @@
+ 
+ 
+ #if defined(LUA_DEBUG)
+-LUAI_FUNC Node *luaH_mainposition (const Table *t, const TValue *key);
++LUAI_FUNC LUANode *luaH_mainposition (const Table *t, const TValue *key);
+ #endif
+ 
+ 
+diff -ruN lua-5.4.7/src/luac.c lua-5.4.7-patched/src/luac.c
+--- lua-5.4.7/src/luac.c	2023-03-27 21:16:45.000000000 +0000
++++ lua-5.4.7-patched/src/luac.c	2024-12-12 23:26:55.380247034 +0000
+@@ -125,7 +125,7 @@
+ 
+ static const char* reader(lua_State* L, void* ud, size_t* size)
+ {
+- UNUSED(L);
++//  UNUSED(L);
+  if ((*(int*)ud)--)
+  {
+   *size=sizeof(FUNCTION)-1;
+@@ -161,7 +161,7 @@
+ 
+ static int writer(lua_State* L, const void* p, size_t size, void* u)
+ {
+- UNUSED(L);
++//  UNUSED(L);
+  return (fwrite(p,size,1,(FILE*)u)!=1) && (size!=0);
+ }
+ 
