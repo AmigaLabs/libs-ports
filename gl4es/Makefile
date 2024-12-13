@@ -4,7 +4,7 @@
 # 
 
 # Latest release tag is 1.1.4 - Set to edge to clone repo
-LIB_VERSION=edge
+LIB_VERSION=1.1.6
 LIBC?=newlib
 
 PKGNAME=gl4es-${LIB_VERSION}
@@ -30,9 +30,14 @@ endif
 ##@ Build
 
 .PHONY: init
-init: download  ## Download the archive and initialize the build
+init: download patch ## Download the archive and initialize the build
 	@cd ${PKGNAME} && \
 	mkdir build
+
+.PHONY: patch
+patch:
+	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)

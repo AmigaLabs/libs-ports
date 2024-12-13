@@ -1,0 +1,12 @@
+diff -ruN gl4es-1.1.6/src/gl/gl4es.c gl4es-1.1.6-patched/src/gl/gl4es.c
+--- gl4es-1.1.6/src/gl/gl4es.c	2024-05-04 15:35:02.000000000 +0000
++++ gl4es-1.1.6-patched/src/gl/gl4es.c	2024-12-13 22:52:11.482191986 +0000
+@@ -250,7 +250,7 @@
+     // small optim... continue a render command if possible
+     glstate->list.active = NewDrawStage(glstate->list.active, mode);
+     glstate->list.pending = 0;
+-    glstate->list.active->use_vbo_array = 2;
++    glstate->list.active->use_vbo_array = 1;
+     noerrorShimNoPurge();	// TODO, check Enum validity
+ }
+ AliasExport(void,glBegin,,(GLenum mode));
