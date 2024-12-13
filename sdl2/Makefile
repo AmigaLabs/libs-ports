@@ -3,7 +3,7 @@
 # make build LIBC=clib4
 # 
 
-LIB_VERSION=2.30.1-release2
+LIB_VERSION=2.30.9
 LIBC?=newlib
 DEBUG=
 

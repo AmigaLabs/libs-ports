@@ -3,7 +3,7 @@
 # make build LIBC=clib4
 # 
 
-LIB_VERSION=2.30.1-release2
+LIB_VERSION=2.30.9
 LIBC?=newlib
 DEBUG=
 
@@ -42,16 +42,13 @@ build: # Build with specified LIBC=(newlib|clib2|clib4)
 		CRT=${LIBC} \
 		-j$(shell nproc)
 
-.PHONY: newlib clib2 clib4
+.PHONY: newlib clib4
 newlib: ## Build using newlib crt and prepares the files for packaging
 	@make build LIBC=$@
 	@make package LIBC=$@
-	@make clean
-	@make build LIBC=$@ DEBUG=debug
-	@make package LIBC=$@ DEBUG=debug
-# clib2: ## Build using clib2 crt and prepares the files for packaging
-# 	@make build LIBC=$@
-# 	@make package LIBC=$@
+# @make clean
+# @make build LIBC=$@ DEBUG=debug
+# @make package LIBC=$@ DEBUG=debug
 clib4: ## Build using clib4 crt and prepares the files for packaging
 	@make build LIBC=$@
 	@make package LIBC=$@
