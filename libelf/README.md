@@ -1,6 +1,6 @@
 # libelf for AmigaOS 4
 
-Source: [https://fossies.org/linux/misc/old/](https://fossies.org/linux/misc/old/)
+Source: [https://fossies.org/linux/misc/old/libelf-0.8.13.tar.gz/](https://fossies.org/linux/misc/old/libelf-0.8.13.tar.gz/)
 
 This makefile can be used to compile the above library and create a new release lha archive, to be used with the AmigaOS 4 SDK, for native and cross compiling.
 

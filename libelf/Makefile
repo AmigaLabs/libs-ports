@@ -74,7 +74,7 @@ release-init: ## Prepare the release folders
 	@rm -rf ./SDK
 
 	@echo "${CCPINK}${CCBOLD}\n-> Create release folders...\n${CCEND}"
-	@mkdir -p ./SDK/local/Documentation/libelf/man
+	@mkdir -p ./SDK/local/Documentation/libelf
 	@cp ${PKGNAME}/ChangeLog ./SDK/local/Documentation/libelf/
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/libelf/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/libelf/
