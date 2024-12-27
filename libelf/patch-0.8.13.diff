@@ -1,0 +1,12 @@
+diff -ruN libelf-0.8.13/lib/private.h libelf-0.8.13-patched/lib/private.h
+--- libelf-0.8.13/lib/private.h	2009-11-01 13:04:19.000000000 +0000
++++ libelf-0.8.13-patched/lib/private.h	2024-12-27 11:55:20.999898124 +0000
+@@ -96,7 +96,7 @@
+ # include <sys/link.h>
+ #endif /* __LIBELF_NEED_LINK_H */
+ 
+-#if HAVE_AR_H
++#if HAVE_AR_H && defined(__NEWLIB__)
+ #include <ar.h>
+ #else /* HAVE_AR_H */
+ 
