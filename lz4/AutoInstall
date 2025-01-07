@@ -1,0 +1,16 @@
+Delete SDK:local/clib4/bin/lz4 QUIET
+Delete SDK:local/newlib/bin/lz4 QUIET
+Delete SDK:local/clib4/lib/liblz4#? QUIET
+Delete SDK:local/newlib/lib/liblz4#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/liblz4.pc QUIET
+Delete SDK:local/newlib/lib/pkgconfig/liblz4.pc QUIET
+Delete SDK:local/clib4/include/liblz4 ALL QUIET
+Delete SDK:local/newlib/include/liblz4 ALL QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
+cd SDK:local/newlib/lib
+MakeLink liblz4.so liblz4.so.1 SOFT
+MakeLink liblz4.so liblz4.so.1.10.0 SOFT
+cd SDK:local/clib4/lib
+MakeLink liblz4.so liblz4.so.1 SOFT
+MakeLink liblz4.so liblz4.so.1.10.0 SOFT
