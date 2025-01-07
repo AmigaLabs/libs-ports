@@ -30,7 +30,7 @@ make release
 
 ## Notes
 
-gl4es v1.1.6 has a change in `src/gl/gl4es.c` setting `glstate->list.active->use_vbo_array = 1;`, as it can be seen from the patch file. This was proposed by the user baldric, because based on his tests, this increases the speed of gl4es on AmigaOS 4. This is **EXPERIMENTAL**.
+gl4es v1.1.6 has a change in `src/gl/gl4es.c` setting `glstate->list.active->use_vbo_array = 0;`, as it can be seen from the patch file `patch-1.1.6.diff`. This was proposed by the user baldric, because based on his tests, this increases the speed of gl4es on AmigaOS 4. This is **EXPERIMENTAL**.
 This takes the following values:
 ```C
 int      use_vbo_array;   // 0=Not evaluated, 1=No, 2=Yes

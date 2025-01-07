@@ -6,7 +6,7 @@ diff -ruN gl4es-1.1.6/src/gl/gl4es.c gl4es-1.1.6-patched/src/gl/gl4es.c
      glstate->list.active = NewDrawStage(glstate->list.active, mode);
      glstate->list.pending = 0;
 -    glstate->list.active->use_vbo_array = 2;
-+    glstate->list.active->use_vbo_array = 1;
++    glstate->list.active->use_vbo_array = 0;
      noerrorShimNoPurge();	// TODO, check Enum validity
  }
  AliasExport(void,glBegin,,(GLenum mode));
