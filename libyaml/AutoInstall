@@ -1,0 +1,10 @@
+Delete SDK:local/newlib/lib/libyaml#? QUIET
+Delete SDK:local/newlib/lib/pkgconfig/libyaml.pc QUIET
+
+Delete SDK:local/clib2/lib/libyaml#? QUIET
+Delete SDK:local/clib2/lib/pkgconfig/libyaml.pc QUIET
+
+Delete SDK:local/clib4/lib/libyaml#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/libyaml.pc QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
