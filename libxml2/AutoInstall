@@ -1,0 +1,5 @@
+Delete SDK:local/clib4/lib/libxml2#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/libxml2.pc QUIET
+Delete SDK:local/clib4/include/libxml2 ALL QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
