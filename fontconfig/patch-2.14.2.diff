@@ -1,0 +1,384 @@
+diff -ruN fontconfig-2.14.2/src/fcatomic.c fontconfig-2.14.2-patched/src/fcatomic.c
+--- fontconfig-2.14.2/src/fcatomic.c	2022-12-05 12:57:09.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcatomic.c	2025-02-15 12:43:40.762165968 +0000
+@@ -70,6 +70,10 @@
+ #define LCK_NAME	".LCK"
+ #define TMP_NAME	".TMP-XXXXXX"
+ 
++#ifdef __amigaos4__
++#undef HAVE_LINK
++#endif
++
+ FcAtomic *
+ FcAtomicCreate (const FcChar8   *file)
+ {
+diff -ruN fontconfig-2.14.2/src/fccache.c fontconfig-2.14.2-patched/src/fccache.c
+--- fontconfig-2.14.2/src/fccache.c	2023-01-25 10:11:57.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fccache.c	2025-02-15 12:44:50.149987572 +0000
+@@ -53,6 +53,10 @@
+ #define O_BINARY 0
+ #endif
+ 
++#ifndef INTPTR_MAX
++#define INTPTR_MAX LONG_MAX
++#endif
++
+ FcBool
+ FcDirCacheCreateUUID (FcChar8  *dir,
+ 		      FcBool    force,
+@@ -112,7 +116,11 @@
+     return ret;
+ }
+ 
++#ifndef __amigaos4__
+ #define CACHEBASE_LEN (1 + 36 + 1 + sizeof (FC_ARCHITECTURE) + sizeof (FC_CACHE_SUFFIX))
++#else
++#define CACHEBASE_LEN (1 + 8 + 1 + sizeof (FC_ARCHITECTURE) + sizeof (FC_CACHE_SUFFIX))
++#endif
+ 
+ static FcBool
+ FcCacheIsMmapSafe (int fd)
+@@ -194,9 +202,14 @@
+     if (key)
+ 	FcStrFree (key);
+ 
++#ifndef __amigaos4__
+     cache_base[0] = '/';
+     hex_hash = cache_base + 1;
+     for (cnt = 0; cnt < 16; ++cnt)
++#else
++    hex_hash = cache_base;
++    for (cnt = 0; cnt < 4; ++cnt)
++#endif
+     {
+ 	hex_hash[2*cnt  ] = bin2hex[hash[cnt] >> 4];
+ 	hex_hash[2*cnt+1] = bin2hex[hash[cnt] & 0xf];
+@@ -242,8 +255,12 @@
+ 	close (fd);
+ 	if (len < 0)
+ 	    goto bail;
++#ifndef __amigaos4__
+ 	cache_base[0] = '/';
+ 	strcpy ((char *)&cache_base[1], suuid);
++#else
++	strcpy ((char *)&cache_base[0], suuid);
++#endif
+ 	strcat ((char *) cache_base, "-" FC_ARCHITECTURE FC_CACHE_SUFFIX);
+ 	if (FcDebug () & FC_DBG_CACHE)
+ 	{
+@@ -1549,8 +1566,13 @@
+ 	    continue;
+ 	/* skip cache files for different architectures and */
+ 	/* files which are not cache files at all */
++#ifndef __amigaos4__
+ 	if (strlen(ent->d_name) != 32 + strlen ("-" FC_ARCHITECTURE FC_CACHE_SUFFIX) ||
+ 	    strcmp(ent->d_name + 32, "-" FC_ARCHITECTURE FC_CACHE_SUFFIX))
++#else
++    if (strlen(ent->d_name) != 8 + strlen ("-" FC_ARCHITECTURE FC_CACHE_SUFFIX) ||
++        strcmp(ent->d_name + 8, "-" FC_ARCHITECTURE FC_CACHE_SUFFIX))
++#endif
+ 	    continue;
+ 
+ 	file_name = FcStrBuildFilename (dir, (FcChar8 *)ent->d_name, NULL);
+diff -ruN fontconfig-2.14.2/src/fccfg.c fontconfig-2.14.2-patched/src/fccfg.c
+--- fontconfig-2.14.2/src/fccfg.c	2023-01-25 05:37:45.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fccfg.c	2025-02-15 12:46:03.434205552 +0000
+@@ -30,6 +30,11 @@
+ #endif
+ #include <sys/types.h>
+ 
++#ifdef __amigaos4__
++#undef FONTCONFIG_PATH
++#define FONTCONFIG_PATH "PROGDIR:conf/font"
++#endif
++
+ #if defined (_WIN32) && !defined (R_OK)
+ #define R_OK 4
+ #endif
+@@ -2393,7 +2398,7 @@
+ 	  file[0] == '\\' ||
+ 	  (isalpha (file[0]) && file[1] == ':' && (file[2] == '/' || file[2] == '\\'))))
+ 	strcat ((char *) path, "\\");
+-#else
++#elif !defined(__amigaos4__)
+     if ((!path[0] || path[strlen((char *) path)-1] != '/') && file[0] != '/')
+ 	strcat ((char *) path, "/");
+     else
+@@ -2419,7 +2424,11 @@
+     int	    i;
+ 
+     npath = 2;	/* default dir + null */
++#ifndef __amigaos4__
+     env = (FcChar8 *) getenv ("FONTCONFIG_PATH");
++#else
++	env = (FcChar8 *) "PROGDIR:conf/font/conf.d/";
++#endif
+     if (env)
+     {
+ 	e = env;
+@@ -2503,6 +2512,10 @@
+ 	if (home == NULL)
+ 	    home = getenv ("USERPROFILE");
+ #endif
++#ifdef __amigaos4__
++	if (home == NULL)
++		home = "PROGDIR:conf/font";
++#endif
+ 
+ 	return (FcChar8 *) home;
+     }
+@@ -2529,8 +2542,12 @@
+ 	{
+ 	    if (home)
+ 		memcpy (ret, home, len);
++#ifndef __amigaos4__
+ 	    memcpy (&ret[len], FC_DIR_SEPARATOR_S ".cache", 7);
+ 	    ret[len + 7] = 0;
++#else
++		ret[len] = 0;
++#endif
+ 	}
+     }
+ 
+@@ -2645,8 +2662,10 @@
+ 	 *
+ 	 * If $XDG_DATA_DIRS is either not set or empty, a value equal to /usr/local/share/:/usr/share/ should be used.
+ 	 */
++#ifndef __amigaos4__
+ 	FcStrSetAdd (ret, (const FcChar8 *) "/usr/local/share");
+ 	FcStrSetAdd (ret, (const FcChar8 *) "/usr/share");
++#endif
+     }
+ 
+     return ret;
+@@ -2671,12 +2690,21 @@
+     if (!config)
+ 	return NULL;
+     sysroot = FcConfigGetSysRoot (config);
++#ifndef __amigaos4__
+     if (!url || !*url)
+     {
+ 	url = (FcChar8 *) getenv ("FONTCONFIG_FILE");
+ 	if (!url)
+ 	    url = (FcChar8 *) FONTCONFIG_FILE;
+     }
++#else
++	FcChar8 *filepath = malloc(strlen("PROGDIR:conf/font/fonts.conf") + 1);
++	if (filepath) {
++		strcpy(filepath, "PROGDIR:conf/font/fonts.conf\0");
++		return filepath;
++	}
++	return NULL;
++#endif
+     file = 0;
+ 
+     if (FcStrIsAbsoluteFilename(url))
+diff -ruN fontconfig-2.14.2/src/fccompat.c fontconfig-2.14.2-patched/src/fccompat.c
+--- fontconfig-2.14.2/src/fccompat.c	2020-12-03 11:45:00.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fccompat.c	2025-02-15 12:46:12.167623532 +0000
+@@ -209,7 +209,7 @@
+ #else
+     random_r (&fcrandbuf, &result);
+ #endif
+-#elif HAVE_RANDOM
++#elif HAVE_RANDOM && !defined(__amigaos4__)
+     static char statebuf[256];
+     char *state;
+     static FcBool initialized = FcFalse;
+diff -ruN fontconfig-2.14.2/src/fcdefault.c fontconfig-2.14.2-patched/src/fcdefault.c
+--- fontconfig-2.14.2/src/fcdefault.c	2023-01-25 00:17:59.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcdefault.c	2025-02-15 12:46:29.977783302 +0000
+@@ -160,7 +160,7 @@
+ #else
+ # if defined (HAVE_GETEXECNAME)
+ 	char *p = FcStrdup(getexecname ());
+-# elif defined (HAVE_READLINK)
++# elif defined (HAVE_READLINK) && !defined(__amigaos4__)
+ 	size_t size = FC_PATH_MAX;
+ 	char *p = NULL;
+ 
+@@ -188,6 +188,11 @@
+ 	    free (buf);
+ 	    size *= 2;
+ 	}
++# elif defined(__amigaos4__)	
++	char *buf = calloc(1, 256);
++	char *p = NULL;
++	if (IDOS->GetCliProgramName(buf, 255))
++		p = buf;
+ # else
+ 	char *p = NULL;
+ # endif
+diff -ruN fontconfig-2.14.2/src/fcdir.c fontconfig-2.14.2-patched/src/fcdir.c
+--- fontconfig-2.14.2/src/fcdir.c	2021-06-28 12:43:20.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcdir.c	2025-02-15 12:46:48.511265114 +0000
+@@ -28,6 +28,10 @@
+ #include <dirent.h>
+ #endif
+ 
++#ifdef __amigaos4__
++void (*fontconfig_progress_callback)(int current, int total, char *currentfile) = NULL;
++#endif
++
+ FcBool
+ FcFileIsDir (const FcChar8 *file)
+ {
+@@ -271,7 +275,13 @@
+      * Scan file files to build font patterns
+      */
+     for (i = 0; i < files->num; i++)
++    {
++#ifdef __amigaos4__
++        if(fontconfig_progress_callback)
++            fontconfig_progress_callback(i, files->num, files->strs[i]);
++#endif
+ 	FcFileScanConfig (set, dirs, files->strs[i], config);
++    }
+ 
+ bail2:
+     FcStrSetDestroy (files);
+diff -ruN fontconfig-2.14.2/src/fcinit.c fontconfig-2.14.2-patched/src/fcinit.c
+--- fontconfig-2.14.2/src/fcinit.c	2020-12-03 11:45:00.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcinit.c	2025-02-15 12:47:36.094901056 +0000
+@@ -35,6 +35,17 @@
+ #pragma message("To suppress these warnings, define FC_NO_MT.")
+ #endif
+ 
++#ifdef __amigaos4__
++__attribute__ ((used)) static const char *sc = "$STACK: 1512000";
++
++#undef CONFIGDIR
++#undef FC_TEMPLATEDIR
++#undef FC_CACHEDIR
++#define FC_CACHEDIR "PROGDIR:conf/font/cache"
++#define CONFIGDIR "PROGDIR:conf/font/conf.d"
++#define FC_TEMPLATEDIR "PROGDIR:conf/font/conf.avail"
++#endif
++
+ static FcConfig *
+ FcInitFallbackConfig (const FcChar8 *sysroot)
+ {
+@@ -77,6 +88,9 @@
+ FcConfig *
+ FcInitLoadOwnConfig (FcConfig *config)
+ {
++#if defined(__amigaos4__) && defined(CLIB4)
++    enableUnixPaths();
++#endif
+     if (!config)
+     {
+ 	config = FcConfigCreate ();
+@@ -103,9 +117,13 @@
+ 	size_t plen;
+ 	FcBool have_own = FcFalse;
+ 	char *env_file, *env_path;
+-
++#ifndef __amigaos4__
+ 	env_file = getenv ("FONTCONFIG_FILE");
+ 	env_path = getenv ("FONTCONFIG_PATH");
++#else
++	env_file = "fonts.conf";
++	env_path = "conf.d/";
++#endif
+ 	if ((env_file != NULL && env_file[0] != 0) ||
+ 	    (env_path != NULL && env_path[0] != 0))
+ 	    have_own = FcTrue;
+diff -ruN fontconfig-2.14.2/src/fcint.h fontconfig-2.14.2-patched/src/fcint.h
+--- fontconfig-2.14.2/src/fcint.h	2022-11-26 06:10:36.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcint.h	2025-02-15 12:48:05.245033902 +0000
+@@ -74,6 +74,10 @@
+ #  define FC_SEARCH_PATH_SEPARATOR ';'
+ #  define FC_DIR_SEPARATOR         '\\'
+ #  define FC_DIR_SEPARATOR_S       "\\"
++#elif defined(__amigaos4__)
++#  define FC_SEARCH_PATH_SEPARATOR ';'
++#  define FC_DIR_SEPARATOR         '/'
++#  define FC_DIR_SEPARATOR_S       "/"
+ #else
+ #  define FC_SEARCH_PATH_SEPARATOR ':'
+ #  define FC_DIR_SEPARATOR         '/'
+@@ -505,7 +509,11 @@
+     short    	offset;	    /* lower - upper for RANGE, table id for FULL */
+ } FcCaseFold;
+ 
++#ifndef __amigaos4__
+ #define FC_MAX_FILE_LEN	    4096
++#else
++#define FC_MAX_FILE_LEN     PATH_MAX
++#endif
+ 
+ #define FC_CACHE_MAGIC_MMAP	    0xFC02FC04
+ #define FC_CACHE_MAGIC_ALLOC	    0xFC02FC05
+diff -ruN fontconfig-2.14.2/src/fcstat.c fontconfig-2.14.2-patched/src/fcstat.c
+--- fontconfig-2.14.2/src/fcstat.c	2021-07-08 05:47:01.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcstat.c	2025-02-15 12:48:17.681745788 +0000
+@@ -339,7 +339,7 @@
+     if (FcStat (file, statb) == -1)
+         return -1;
+ 
+-#ifndef _WIN32
++#if !defined(_WIN32) && !defined(__amigaos4__)
+     /* We have a workaround of the broken stat() in FcStat() for Win32.
+      * No need to do something further more.
+      */
+diff -ruN fontconfig-2.14.2/src/fcstr.c fontconfig-2.14.2-patched/src/fcstr.c
+--- fontconfig-2.14.2/src/fcstr.c	2022-12-05 12:57:09.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcstr.c	2025-02-15 12:49:06.088526926 +0000
+@@ -951,6 +951,8 @@
+     if (*s == '\\' ||
+ 	(isalpha (*s) && s[1] == ':' && (s[2] == '/' || s[2] == '\\')))
+ 	return FcTrue;
++#elif defined(__amigaos4__)
++    return strchr((const char *) s, ':') != NULL;
+ #endif
+     return *s == '/';
+ }
+@@ -1050,6 +1052,10 @@
+     FcChar8	    *slash;
+ 
+     slash = (FcChar8 *) strrchr ((const char *) path, '/');
++#ifdef __amigaos4__
++    if (!slash)
++        slash = (FcChar8 *) strrchr ((const char *) path, ':');
++#endif
+ #ifdef _WIN32
+     {
+         FcChar8     *backslash;
+@@ -1070,6 +1076,10 @@
+     FcChar8 *dir;
+ 
+     slash = FcStrLastSlash (file);
++#ifdef __amigaos4__
++    if (*slash == ':')
++       slash++;
++#endif
+     if (!slash)
+ 	return FcStrCopy ((FcChar8 *) ".");
+     dir = malloc ((slash - file) + 1);
+@@ -1220,7 +1230,11 @@
+     FcConvertDosPath ((char *) full);
+     return FcStrCanonAbsoluteFilename (full);
+ #else
++#ifdef __amigaos4__
++    if (s[0] == '/' || (FcChar8 *) strchr((const char *) s, ':'))
++#else
+     if (s[0] == '/')
++#endif /* __amigaos4__ */
+ 	return FcStrCanonAbsoluteFilename (s);
+     else
+     {
+diff -ruN fontconfig-2.14.2/src/fcxml.c fontconfig-2.14.2-patched/src/fcxml.c
+--- fontconfig-2.14.2/src/fcxml.c	2023-01-25 05:37:45.000000000 +0000
++++ fontconfig-2.14.2-patched/src/fcxml.c	2025-02-15 12:49:18.261874352 +0000
+@@ -56,6 +56,11 @@
+ 
+ #endif /* ENABLE_LIBXML2 */
+ 
++#ifdef __amigaos4__
++#undef BUFSIZ
++#define BUFSIZ 8192
++#endif
++
+ #ifdef _WIN32
+ #include <mbstring.h>
+ extern FcChar8 fontconfig_instprefix[];

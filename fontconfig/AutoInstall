@@ -1,0 +1,6 @@
+Delete SDK:local/clib4/bin/lz4 QUIET
+Delete SDK:local/clib4/lib/liblz4#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/liblz4.pc QUIET
+Delete SDK:local/clib4/include/liblz4 ALL QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
