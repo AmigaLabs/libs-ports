@@ -22,8 +22,12 @@ download:
 ##@ Build
 
 .PHONY: init
-init: download  ## Download the archive and initialize the build
-# @mkdir -p ${PKGNAME}/build
+init: download patch ## Download the archive and initialize the build
+
+.PHONY: patch
+patch:
+	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)
@@ -32,7 +36,7 @@ build: # Build with specified LIBC=(newlib|clib2|clib4)
 		CC="ppc-amigaos-gcc" CFLAGS="-mcrt=${LIBC} -O2 -fPIC" CXXFLAGS="-mcrt=${LIBC} -O2 -fPIC" \
 		./autogen.sh --host=ppc-amigaos --enable-shared=no \
 			--prefix=${SDK_PATH}/local/${LIBC} \
-			--includedir=${SDK_PATH}/local/common/include \
+			--includedir=${SDK_PATH}/local/clib4/include \
 			--with-python=no \
 		&& \
 		make -j$(shell nproc)
@@ -74,9 +78,9 @@ release-init: ## Prepare the release folders
 .PHONY: pack/%
 pack/%:
 	@echo "${CCPINK}${CCBOLD}\n-> Packaging for $*\n${CCEND}"
-	@mkdir -p ./SDK/local/common/include/libxml2/libxml
+	@mkdir -p ./SDK/local/clib4/include/libxml2/libxml
 	@mkdir -p ./SDK/local/$*/lib/pkgconfig
-	@cp ${PKGNAME}/include/libxml/*.h ./SDK/local/common/include/libxml2/libxml/
+	@cp ${PKGNAME}/include/libxml/*.h ./SDK/local/clib4/include/libxml2/libxml/
 	@cp ${PKGNAME}/.libs/libxml2.* ./SDK/local/$*/lib/
 	@cp ${PKGNAME}/libxml-2.0.pc ./SDK/local/$*/lib/pkgconfig/
 

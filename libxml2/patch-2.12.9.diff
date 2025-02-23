@@ -1,0 +1,12 @@
+diff -ruN libxml2-2.12.9/include/libxml/xmlerror.h libxml2-2.12.9-patched/include/libxml/xmlerror.h
+--- libxml2-2.12.9/include/libxml/xmlerror.h	2024-07-24 13:51:56.000000000 +0000
++++ libxml2-2.12.9-patched/include/libxml/xmlerror.h	2025-02-23 21:00:27.811462642 +0000
+@@ -856,7 +856,7 @@
+  * Signature of the function to use when there is an error and
+  * the module handles the new error reporting mechanism.
+  */
+-typedef void (*xmlStructuredErrorFunc) (void *userData, const xmlError *error);
++typedef void (*xmlStructuredErrorFunc) (void *userData, xmlError *error);
+ 
+ /** DOC_DISABLE */
+ #define XML_GLOBALS_ERROR \
