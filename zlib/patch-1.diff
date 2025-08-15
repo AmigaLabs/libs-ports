@@ -1,0 +1,15 @@
+--- zlib-1.3.1/Makefile.in	2024-01-22 19:32:37.000000000 +0100
++++ zlib-1.3.1/Makefile.in.amigaos	2025-08-15 11:17:50.872430000 +0200
+@@ -288,10 +288,10 @@
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ minigzip.o $(TEST_LIBS)
+ 
+ examplesh$(EXE): example.o $(SHAREDLIBV)
+-	$(CC) $(CFLAGS) -o $@ example.o $(LDFLAGS) -L. $(SHAREDLIBV)
++	$(CC) $(CFLAGS) -o $@ example.o -use-dynld -athread=native $(LDFLAGS) -L. $(SHAREDLIBV)
+ 
+ minigzipsh$(EXE): minigzip.o $(SHAREDLIBV)
+-	$(CC) $(CFLAGS) -o $@ minigzip.o $(LDFLAGS) -L. $(SHAREDLIBV)
++	$(CC) $(CFLAGS) -o $@ minigzip.o -use-dynld -athread=native $(LDFLAGS) -L. $(SHAREDLIBV)
+ 
+ example64$(EXE): example64.o $(STATICLIB)
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ example64.o $(TEST_LIBS)
