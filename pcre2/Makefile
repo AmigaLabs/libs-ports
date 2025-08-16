@@ -33,10 +33,20 @@ build:
 	cmake .. -DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_CROSSCOMPILING=ON \
 		-DCMAKE_TOOLCHAIN_FILE=$(realpath amigaos4.cmake) \
-		-DCMAKE_C_FLAGS="-mcrt=${LIBC} -O2 -fPIC -athread=native" \
+		-DCMAKE_C_FLAGS="-mcrt=${LIBC} -fPIC -athread=native" \
 		-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC} -lbz2 -lz -lpthread -athread=native" \
 		-DBUILD_SHARED_LIBS=OFF \
+		-DPCRE2_SUPPORT_JIT=OFF \
+		-DPCRE2_BUILD_PCRE2_16=ON \
+		-DPCRE2_BUILD_PCRE2_32=ON \
+		-DPCRE2_SUPPORT_LIBBZ2=ON \
+		-DPCRE2_SUPPORT_LIBZ=ON \
+		-DPCRE2_STATIC_PIC=ON \
 		-DPCRE2GREP_SUPPORT_CALLOUT=OFF \
+		-DBZIP2_INCLUDE_DIR=${SDK_PATH}/local/${LIBC}/include \
+		-DBZIP2_LIBRARIES=${SDK_PATH}/local/${LIBC}/lib/libbz2.a \
+		-DZLIB_INCLUDE_DIR=${SDK_PATH}/local/${LIBC}/include \
+		-DZLIB_LIBRARY=${SDK_PATH}/local/${LIBC}/lib/libz.a \
 		--install-prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	make -j$(shell nproc)
@@ -44,7 +54,7 @@ build:
 #####################################################################
 # Clean jobs
 
-cleanbuild:
+clean:
 	@echo "-> Clean the build folder"
 	@rm -rf ${PKGNAME}/build/*
 
@@ -73,11 +83,10 @@ newlib:
 		./SDK/local/$@/lib/pkgconfig \
 		./SDK/local/$@/bin \
 		./SDK/local/$@/include
-	@cp ./${PKGNAME}/build/libpcre2-8.a ./${PKGNAME}/build/libpcre2-posix.a \
-		 ./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/build/libpcre2-*.a ./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
-	@cp ./${PKGNAME}/build/libpcre2-8.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
 
 clib2:
@@ -87,11 +96,10 @@ clib2:
 		./SDK/local/$@/lib/pkgconfig \
 		./SDK/local/$@/bin \
 		./SDK/local/$@/include
-	@cp ./${PKGNAME}/build/libpcre2-8.a ./${PKGNAME}/build/libpcre2-posix.a \
-		 ./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/build/libpcre2-*.a ./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
-	@cp ./${PKGNAME}/build/libpcre2-8.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
 
 clib4:
@@ -101,11 +109,10 @@ clib4:
 		./SDK/local/$@/lib/pkgconfig \
 		./SDK/local/$@/bin \
 		./SDK/local/$@/include
-	@cp ./${PKGNAME}/build/libpcre2-8.a ./${PKGNAME}/build/libpcre2-posix.a \
-		 ./SDK/local/$@/lib/
+	@cp ./${PKGNAME}/build/libpcre2-*.a ./SDK/local/$@/lib/
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
-	@cp ./${PKGNAME}/build/libpcre2-8.pc ./SDK/local/$@/lib/pkgconfig/
+	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
 	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
 
 archive:
@@ -113,4 +120,4 @@ archive:
 	@rm -f ./${PKGNAME}.lha
 	@lha aq ./${PKGNAME}.lha ./SDK/
 
-release: release-init newlib cleanbuild clib2 cleanbuild clib4 cleanbuild archive
+release: release-init newlib clean clib2 clean clib4 clean archive
