@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=10.44
+LIB_VERSION=10.45
 LIBC?=newlib
 
 PKGNAME=pcre2-${LIB_VERSION}
@@ -70,7 +70,7 @@ release-init:
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
 	@mkdir -p ./SDK/local/Documentation/pcre2
-	@cp ${PKGNAME}/LICENCE ./SDK/local/Documentation/pcre2/
+	@cp ${PKGNAME}/LICENCE* ./SDK/local/Documentation/pcre2/
 	@cp ${PKGNAME}/README* ./SDK/local/Documentation/pcre2/
 	@cp ${PKGNAME}/COPYING* ./SDK/local/Documentation/pcre2/
 	@cp ${PKGNAME}/ChangeLog* ./SDK/local/Documentation/pcre2/
