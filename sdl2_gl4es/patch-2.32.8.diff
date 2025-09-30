@@ -1,0 +1,52 @@
+diff -ruN sdl2-2.32.8/src/video/amigaos4/SDL_os4opengl.c sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4opengl.c
+--- sdl2-2.32.8/src/video/amigaos4/SDL_os4opengl.c	2025-07-15 16:09:15.000000000 +0000
++++ sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4opengl.c	2025-09-30 19:56:08.134108181 +0000
+@@ -20,7 +20,7 @@
+ */
+ #include "../../SDL_internal.h"
+ 
+-#if SDL_VIDEO_DRIVER_AMIGAOS4
++#if SDL_VIDEO_DRIVER_AMIGAOS4 && !defined(SDL_GL4ES)
+ 
+ #include <proto/graphics.h>
+ #include <proto/minigl.h>
+@@ -266,7 +266,7 @@
+     } else {
+         OS4_GL_LogLibraryError();
+     }
+-    
++
+     return result;
+ }
+ 
+diff -ruN sdl2-2.32.8/src/video/amigaos4/SDL_os4openglwrapper.c sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4openglwrapper.c
+--- sdl2-2.32.8/src/video/amigaos4/SDL_os4openglwrapper.c	2025-07-15 16:09:15.000000000 +0000
++++ sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4openglwrapper.c	2025-09-30 19:56:52.506157891 +0000
+@@ -23,7 +23,7 @@
+ 
+ /* wrapper functions for MiniGL */
+ 
+-#if SDL_VIDEO_DRIVER_AMIGAOS4
++#if SDL_VIDEO_DRIVER_AMIGAOS4 && !defined(SDL_GL4ES)
+ 
+ #include <GL/gl.h>
+ #include <GL/glu.h>
+diff -ruN sdl2-2.32.8/src/video/amigaos4/SDL_os4video.c sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4video.c
+--- sdl2-2.32.8/src/video/amigaos4/SDL_os4video.c	2025-07-15 16:09:15.000000000 +0000
++++ sdl2-2.32.8-patched/src/video/amigaos4/SDL_os4video.c	2025-09-30 19:57:30.747201466 +0000
+@@ -384,10 +384,15 @@
+         _this->gl_config.major_version,
+         _this->gl_config.minor_version);
+ 
++#ifdef SDL_GL4ES
++    OS4_SetMiniGLFunctions(_this);
++    return OS4_GL_LoadLibrary(_this, path);
++#else
+     if (OS4_IsMiniGL(_this)) {
+         OS4_SetMiniGLFunctions(_this);
+         return OS4_GL_LoadLibrary(_this, path);
+     }
++#endif
+ 
+ #if SDL_VIDEO_OPENGL_ES2
+     if (OS4_IsOpenGLES2(_this)) {
