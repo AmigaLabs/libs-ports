@@ -1,0 +1,41 @@
+if exists SDK:local/clib4/bin/uchardet
+Delete SDK:local/clib4/bin/uchardet QUIET
+endif
+if exists SDK:local/clib2/bin/uchardet
+Delete SDK:local/clib2/bin/uchardet QUIET
+endif
+if exists SDK:local/newlib/bin/uchardet
+Delete SDK:local/newlib/bin/uchardet QUIET
+endif
+
+if exists SDK:local/clib4/lib/libuchardet.a
+Delete SDK:local/clib4/lib/libuchardet#? QUIET
+endif
+if exists SDK:local/clib2/lib/libuchardet.a
+Delete SDK:local/clib2/lib/libuchardet#? QUIET
+endif
+if exists SDK:local/newlib/lib/libuchardet.a
+Delete SDK:local/newlib/lib/libuchardet#? QUIET
+endif
+
+if exists SDK:local/clib4/lib/pkgconfig/uchardet.pc
+Delete SDK:local/clib4/lib/pkgconfig/uchardet.pc QUIET
+endif
+if exists SDK:local/clib2/lib/pkgconfig/uchardet.pc
+Delete SDK:local/clib2/lib/pkgconfig/uchardet.pc QUIET
+endif
+if exists SDK:local/newlib/lib/pkgconfig/uchardet.pc
+Delete SDK:local/newlib/lib/pkgconfig/uchardet.pc QUIET
+endif
+
+if exists SDK:local/clib4/include/uchardet.h
+Delete SDK:local/clib4/include/uchardet.h ALL QUIET
+endif
+if exists SDK:local/clib2/include/uchardet.h
+Delete SDK:local/clib2/include/uchardet.h ALL QUIET
+endif
+if exists SDK:local/newlib/include/uchardet.h
+Delete SDK:local/newlib/include/uchardet.h ALL QUIET
+endif
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/

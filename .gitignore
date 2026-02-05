@@ -1,6 +1,7 @@
 .vscode
-*-patched
+*-patched*
 *.tar.gz
 
 icu/icu-release
 curl/curl-8.*
+_WIP
