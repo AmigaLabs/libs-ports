@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=5.4.7
+LIB_VERSION=5.4.8
 LIBC?=newlib
 
 PKGNAME=lua-${LIB_VERSION}
