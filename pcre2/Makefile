@@ -3,7 +3,7 @@
 # make LIBC=clib4
 # 
 
-LIB_VERSION=10.45
+LIB_VERSION=10.47
 LIBC?=newlib
 
 PKGNAME=pcre2-${LIB_VERSION}
@@ -20,11 +20,11 @@ download:
 	echo "-> Extract archive" && \
 	tar xzpf ${PKGNAME}.tar.gz
 
-init: download patches
+init: download patch
 	@cd ${PKGNAME} && \
 	mkdir build
 
-patches:
+patch:
 	@echo "-> Apply the patches"
 	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
@@ -76,7 +76,7 @@ release-init:
 	@cp ${PKGNAME}/ChangeLog* ./SDK/local/Documentation/pcre2/
 	@cp -R ${PKGNAME}/doc/* ./SDK/local/Documentation/pcre2/
 
-newlib:
+newlib: clean
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib \
@@ -87,9 +87,9 @@ newlib:
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
 	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
-	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
+	@cp ./${PKGNAME}/build/interface/pcre2*.h ./SDK/local/$@/include/
 
-clib2:
+clib2: clean
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib \
@@ -100,9 +100,9 @@ clib2:
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
 	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
-	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
+	@cp ./${PKGNAME}/build/interface/pcre2*.h ./SDK/local/$@/include/
 
-clib4:
+clib4: clean
 	@echo "-> Building $@ based libraries..."
 	@make LIBC=$@
 	@mkdir -p ./SDK/local/$@/lib \
@@ -113,11 +113,11 @@ clib4:
 	@cp ./${PKGNAME}/build/pcre2*test ./${PKGNAME}/build/pcre2grep \
 		./SDK/local/$@/bin/
 	@cp ./${PKGNAME}/build/libpcre2-*.pc ./SDK/local/$@/lib/pkgconfig/
-	@cp ./${PKGNAME}/build/pcre2.h ./SDK/local/$@/include/
+	@cp ./${PKGNAME}/build/interface/pcre2*.h ./SDK/local/$@/include/
 
 archive:
 	@echo "-> Creating the lha release file..."
 	@rm -f ./${PKGNAME}.lha
 	@lha aq ./${PKGNAME}.lha ./SDK/
 
-release: release-init newlib clean clib2 clean clib4 clean archive
+release: release-init newlib clib2 clib4 archive

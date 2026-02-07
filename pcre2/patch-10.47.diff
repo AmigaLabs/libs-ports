@@ -1,0 +1,42 @@
+diff -ruN pcre2-10.47/src/pcre2grep.c pcre2-10.47-patched/src/pcre2grep.c
+--- pcre2-10.47/src/pcre2grep.c	2025-10-20 11:35:02.000000000 +0000
++++ pcre2-10.47-patched/src/pcre2grep.c	2026-02-07 21:35:46.405655207 +0000
+@@ -135,7 +135,11 @@
+ #define FALSE 0
+ #define TRUE 1
+ 
++#if defined(__amigaos4__)
++typedef short int BOOL;
++#else
+ typedef int BOOL;
++#endif
+ 
+ #define DEFAULT_CAPTURE_MAX 50
+ 
+diff -ruN pcre2-10.47/src/pcre2_internal.h pcre2-10.47-patched/src/pcre2_internal.h
+--- pcre2-10.47/src/pcre2_internal.h	2025-10-20 11:35:02.000000000 +0000
++++ pcre2-10.47-patched/src/pcre2_internal.h	2026-02-07 21:36:24.839095755 +0000
+@@ -90,7 +90,11 @@
+ compiler warnings in environments where these macros are defined elsewhere.
+ Unfortunately, there is no way to do the same for the typedef. */
+ 
++#if defined(__amigaos4__)
++typedef short int BOOL;
++#else
+ typedef int BOOL;
++#endif
+ #ifndef FALSE
+ #define FALSE   0
+ #define TRUE    1
+diff -ruN pcre2-10.47/src/pcre2test.c pcre2-10.47-patched/src/pcre2test.c
+--- pcre2-10.47/src/pcre2test.c	2025-10-20 11:35:02.000000000 +0000
++++ pcre2-10.47-patched/src/pcre2test.c	2026-02-07 21:37:40.824966903 +0000
+@@ -3773,7 +3773,7 @@
+   else if (strcmp(arg, "-S") == 0 && argc > 2 &&
+       ((uli = strtoul(argv[op+1], &endptr, 10)), *endptr == 0))
+     {
+-#if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS)
++#if defined(_WIN32) || defined(WIN32) || defined(__HAIKU__) || defined(NATIVE_ZOS) || defined(__VMS) || (defined(__amigaos4__) && (defined(__NEWLIB__) || defined(__CLIB2__)))
+     cfprintf(clr_test_error, stderr, "pcre2test: -S is not supported on this OS\n");
+     exit(1);
+ #else
