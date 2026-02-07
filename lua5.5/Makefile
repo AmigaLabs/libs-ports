@@ -75,10 +75,10 @@ release-init: ## Prepare the re folders
 	@echo "${CCPINK}${CCBOLD}\n-> Clear previous release folders...\n${CCEND}"
 	@rm -rf ./SDK
 	@echo "-> Create release folders..."
-	@mkdir -p ./SDK/local/common/include/lua54
-	@mkdir -p ./SDK/local/Documentation/lua54
-	@cp -r ${PKGNAME}/doc ./SDK/local/Documentation/lua54/
-	@cp ${PKGNAME}/README* ./SDK/local/Documentation/lua54/
+	@mkdir -p ./SDK/local/common/include/lua55
+	@mkdir -p ./SDK/local/Documentation/lua55
+	@cp -r ${PKGNAME}/doc ./SDK/local/Documentation/lua55/
+	@cp ${PKGNAME}/README* ./SDK/local/Documentation/lua55/
 
 .PHONY: package
 package:
@@ -90,7 +90,7 @@ ifneq ($(LIBC),newlib)
 	@cp ./${PKGNAME}/src/lauxlib.h ./${PKGNAME}/src/lua.h \
 		./${PKGNAME}/src/lua.hpp \
 		./${PKGNAME}/src/luaconf.h ./${PKGNAME}/src/lualib.h \
-		./SDK/local/common/include/lua54/
+		./SDK/local/common/include/lua55/
 endif
 	@cp ./${PKGNAME}/src/liblua.a ./SDK/local/${LIBC}/lib/liblua55.a
 	@cp ./${PKGNAME}/src/lua ./${PKGNAME}/src/luac \
