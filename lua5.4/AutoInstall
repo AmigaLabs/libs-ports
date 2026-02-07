@@ -1,7 +1,22 @@
+if exists SDK:local/clib4/bin/lua
 Delete SDK:local/clib4/bin/lua#? QUIET
+endif
+if exists SDK:local/clib2/bin/lua
+Delete SDK:local/clib2/bin/lua#? QUIET
+endif
+if exists SDK:local/newlib/bin/lua
 Delete SDK:local/newlib/bin/lua#? QUIET
+endif
+
+if exists SDK:local/clib4/lib/liblua54.a
 Delete SDK:local/clib4/lib/liblua#? QUIET
+endif
+if exists SDK:local/clib2/lib/liblua54.a
+Delete SDK:local/clib2/lib/liblua#? QUIET
+endif
+if exists SDK:local/newlib/lib/liblua54.a
 Delete SDK:local/newlib/lib/liblua#? QUIET
+endif
 
 Copy SDK/local/ ALL CLONE QUIET SDK:local/
 cd SDK:local/newlib/lib

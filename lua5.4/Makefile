@@ -38,12 +38,15 @@ build: # Build with specified LIBC=(newlib|clib2|clib4)
 
 .PHONY: newlib clib2 clib4
 newlib: ## Build using newlib crt and prepares the files for packaging
+	@make -C ${PKGNAME}/src clean
 	@make build LIBC=$@
 	@make package LIBC=$@
 clib2: ## Build using clib2 crt and prepares the files for packaging
+	@make -C ${PKGNAME}/src clean
 	@make build LIBC=$@
 	@make package LIBC=$@
 clib4: ## Build using clib4 crt and prepares the files for packaging
+	@make -C ${PKGNAME}/src clean
 	@make build LIBC=$@
 	@make package LIBC=$@
 
@@ -64,7 +67,7 @@ cleanall: ## Clean the downloaded files and folders
 ##@ Release
 
 .PHONY: release
-release: release-init newlib clean clib4 clean archive ## Build and create the release
+release: release-init newlib clib2 clib4 archive ## Build and create the release
 
 .PHONY: release-init
 release-init: ## Prepare the re folders
