@@ -40,20 +40,21 @@ patch:
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)
 	@echo "${CCPINK}${CCBOLD}\n-> Building using the ${LIBC}...\n${CCEND}"
-	@mkdir ${PKGNAME}/build-${LIBC} && cd ${PKGNAME}/build-${LIBC} && \
-	cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_CROSSCOMPILING=ON \
-		-DCMAKE_TOOLCHAIN_FILE=$(realpath amigaos4.cmake) \
-		-DCMAKE_C_FLAGS="-mcrt=${LIBC} -O2 -fPIC" \
-		-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC}" \
-		-DCMAKE_EXE_LINKER_FLAGS="-mcrt=${LIBC} -lpthread -athread=native" \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DBUILD_STATIC=ON \
-		-DBUILD_BINARY=${COMPILE_BIN} \
-		-DCHECK_SSE2=OFF \
-		--install-prefix=${SDK_PATH}/local/${LIBC} \
-	&& \
-	make -j$(shell nproc)
+	@if [ ! -d "${PKGNAME}/build-${LIBC}" ]; then mkdir -p "${PKGNAME}/build-${LIBC}"; fi && \
+		cd ${PKGNAME}/build-${LIBC} && \
+		cmake .. -DCMAKE_BUILD_TYPE=Release \
+			-DCMAKE_CROSSCOMPILING=ON \
+			-DCMAKE_TOOLCHAIN_FILE=$(realpath amigaos4.cmake) \
+			-DCMAKE_C_FLAGS="-mcrt=${LIBC} -O2 -fPIC" \
+			-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC}" \
+			-DCMAKE_EXE_LINKER_FLAGS="-mcrt=${LIBC} -lpthread -athread=native" \
+			-DBUILD_SHARED_LIBS=OFF \
+			-DBUILD_STATIC=ON \
+			-DBUILD_BINARY=${COMPILE_BIN} \
+			-DCHECK_SSE2=OFF \
+			--install-prefix=${SDK_PATH}/local/${LIBC} \
+		&& \
+		make -j$(shell nproc)
 
 .PHONY: newlib
 newlib: ## Build using newlib crt and prepares the files for packaging
