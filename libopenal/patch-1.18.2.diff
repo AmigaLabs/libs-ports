@@ -1,0 +1,24 @@
+diff -ruN libopenal-1.18.2/openal-soft-1.18.2/makefile.amigaos4 libopenal-1.18.2-patched/openal-soft-1.18.2/makefile.amigaos4
+--- libopenal-1.18.2/openal-soft-1.18.2/makefile.amigaos4	2026-08-23 18:22:40.745469069 +0000
++++ libopenal-1.18.2-patched/openal-soft-1.18.2/makefile.amigaos4	2026-08-23 18:21:44.982404982 +0000
+@@ -3,16 +3,17 @@
+ AR     = $(HOST)-ar
+ RANLIB = $(HOST)-ranlib
+ STRIP  = $(HOST)-strip
++LIBC   = newlib
+ 
+ AMIGADATE = $(shell date +"%-d.%-m.%Y")
+ 
+ OPTIMIZE = -O2
+ DEBUG    = -g
+-WARNINGS = -Wall -Wwrite-strings -Werror
++WARNINGS = -Wall -Wwrite-strings -Wno-stringop-overread
+ DEFINES  = -DAL_ALEXT_PROTOTYPES -D__AMIGADATE__=\"$(AMIGADATE)\"
+-INCPATHS = -I. -I./include -I./OpenAL32/Include -I./Alc -I./common
++INCPATHS = -I. -I./OpenAL32/Include -I./Alc -I./common -I./include -I$(SDK_PATH)/include/include_h/exec
+ 
+-CFLAGS   = -std=gnu11 $(OPTIMIZE) $(DEBUG) $(WARNINGS) $(INCPATHS) $(DEFINES)
++CFLAGS   = -mcrt=${LIBC} -std=gnu11 $(OPTIMIZE) $(DEBUG) $(WARNINGS) $(INCPATHS) $(DEFINES)
+ PICFLAGS = -fPIC -DPIC
+ 
+ STATIC_LIB := libopenal.a
