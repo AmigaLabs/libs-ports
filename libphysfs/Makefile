@@ -18,7 +18,7 @@ MINOR = $(word 2, $(subst ., ,$(LIB_VERSION)))
 
 .PHONY: download
 download:
-	@echo "${CCPINK}${CCBOLD}\n-> Cloning libphysfs repository ${PKGNAME}\n${CCEND}"
+	@echo "${CCPINK}${CCBOLD}\n-> Cloning ${LIBNAME} repository ${PKGNAME}\n${CCEND}"
 	@git clone https://github.com/icculus/physfs.git ${PKGNAME} --depth 1
 
 #####################################################################
@@ -104,29 +104,3 @@ archive: ## Create the release archive
 	@echo "${CCPINK}${CCBOLD}\n-> Creating the lha release file...\n${CCEND}"
 	@rm -f ./${PKGNAME}.lha
 	@lha aq ./${PKGNAME}.lha ./SDK/
-
-.PHONY: download_tests
-download_tests:
-ifeq ($(LIB_VERSION),edge)
-	@echo "${CCPINK}${CCBOLD}\n-> Cloning litehtml-tests repository \n${CCEND}"
-	@git clone https://github.com/litehtml/litehtml-tests.git --depth 1
-endif
-
-.PHONY: init_tests
-init_tests: download_tests ## Download the archive and initialize the build
-	@cd litehtml-tests && \
-	mkdir build
-
-.PHONY: build_tests
-build_tests: ## Build with specified LIBC=(newlib|clib2|clib4)
-	cd litehtml-tests/build && \
-	cmake .. -DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_CROSSCOMPILING=ON \
-		-DCMAKE_TOOLCHAIN_FILE=$(realpath amigaos4.cmake) \
-		-DCMAKE_C_FLAGS="-mcrt=${LIBC} -O2 -fPIC -athread=native" \
-		-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC} -lpthread -athread=native" \
-		-DBUILD_SHARED_LIBS=OFF \
-		-DLITEHTML_PATH=../litehtml-edge \
-		--install-prefix=${SDK_PATH}/local/${LIBC} \
-	&& \
-	make -j$(shell nproc)
