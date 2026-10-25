@@ -28,14 +28,12 @@ download:
 
 .PHONY: init
 init: download patch
-	@cd ${PKGNAME} 
-# 	&& \
-# 	mkdir build
-
+	@cd ${PKGNAME}
+	
 .PHONY: patch
 patch:
 	@echo "${CCPINK}${CCBOLD}\n-> Apply the patches\n${CCEND}"
-	@patch -s -p0 < ./patch-0.0.8.diff
+	@patch -s -p0 < ./patch-${LIB_VERSION}.diff
 
 .PHONY: build
 build: # Build with specified LIBC=(newlib|clib2|clib4)
