@@ -1,0 +1,12 @@
+Delete SDK:local/newlib/lib/libxslt#? QUIET
+Delete SDK:local/newlib/lib/pkgconfig/libxslt.pc QUIET
+
+Delete SDK:local/clib2/lib/libxslt#? QUIET
+Delete SDK:local/clib2/lib/pkgconfig/libxslt.pc QUIET
+
+Delete SDK:local/clib4/lib/libxslt#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/libxslt.pc QUIET
+
+Delete SDK:local/common/include/libxslt ALL QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
