@@ -1,0 +1,4 @@
+Delete SDK:local/clib4/lib/libtasn1#? QUIET
+Delete SDK:local/clib4/lib/pkgconfig/libtasn1.pc QUIET
+
+Copy SDK/local/ ALL CLONE QUIET SDK:local/
