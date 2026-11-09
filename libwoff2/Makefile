@@ -40,15 +40,14 @@ build: ## Build with specified LIBC=(newlib|clib2|clib4)
 		-DCMAKE_CXX_FLAGS="-mcrt=${LIBC} -O2 -fPIC -athread=native" \
 		-DCMAKE_MODULE_LINKER_FLAGS="-mcrt=${LIBC} -lpthread -athread=native" \
 		-DBUILD_SHARED_LIBS=OFF \
-		-DBROTLIDEC_INCLUDE_DIRS=${SDK_PATH}/local/${LIBC}/include/brotli/ \
-		-DBROTLIDEC_LIBRARIES=${SDK_PATH}/local/${LIBC}/lib/libbrotlidec.a \
-		-DBROTLIENC_INCLUDE_DIRS=${SDK_PATH}/local/${LIBC}/include/brotli/ \
-		-DBROTLIENC_LIBRARIES=${SDK_PATH}/local/${LIBC}/lib/libbrotlienc.a \
+		-DBROTLIDEC_INCLUDE_DIRS=${SDK_PATH}/local/${LIBC}/include \
+		-DBROTLIDEC_LIBRARIES="${SDK_PATH}/local/${LIBC}/lib/libbrotlidec.a;${SDK_PATH}/local/${LIBC}/lib/libbrotlicommon.a" \
+		-DBROTLIENC_INCLUDE_DIRS=${SDK_PATH}/local/${LIBC}/include \
+		-DBROTLIENC_LIBRARIES="${SDK_PATH}/local/${LIBC}/lib/libbrotlienc.a;${SDK_PATH}/local/${LIBC}/lib/libbrotlicommon.a" \
 		--install-prefix=${SDK_PATH}/local/${LIBC} \
 	&& \
 	cmake --build ./ --parallel $$(nproc --ignore=1) 
 # 	--verbose
-# 	make -j$(shell nproc)
 
 .PHONY: build/%
 build/%:
@@ -71,7 +70,7 @@ cleanall: ## Clean the downloaded files and folders
 ##@ Release
 
 .PHONY: release
-release: release-init build/newlib pack/newlib clean build/clib2 pack/clib2 clean build/clib4 pack/clib4 clean archive ## Build and create the release
+release: release-init build/clib4 pack/clib4 clean archive ## Build and create the release
 
 .PHONY: release-init
 release-init: ## Prepare the release folders
@@ -79,29 +78,20 @@ release-init: ## Prepare the release folders
 	@rm -rf ./SDK
 
 	@echo "${CCPINK}${CCBOLD}\n-> Create release folders...\n${CCEND}"
-	@mkdir -p ./SDK/local/Documentation/libzip/man
-	@cp ${PKGNAME}/API-CHANGES.md ./SDK/local/Documentation/libzip/
-	@cp ${PKGNAME}/AUTHORS ./SDK/local/Documentation/libzip/
-	@cp ${PKGNAME}/README* ./SDK/local/Documentation/libzip/
-	@cp ${PKGNAME}/SECURITY* ./SDK/local/Documentation/libzip/
-	@cp ${PKGNAME}/NEWS* ./SDK/local/Documentation/libzip/
+	@mkdir -p ./SDK/local/Documentation/libwoff2
+	@cp ${PKGNAME}/README* ./SDK/local/Documentation/libwoff2/
+	@cp ${PKGNAME}/LICENSE ./SDK/local/Documentation/libwoff2/
 
 .PHONY: pack/%
 pack/%:
 	@echo "${CCPINK}${CCBOLD}\n-> Packaging for $*\n${CCEND}"
-	@if [ "$*" = "newlib" ]; then \
-		cp ${PKGNAME}/build/man/*.3 ./SDK/local/Documentation/libzip/man/; \
-	fi
-	@mkdir -p ./SDK/local/$*/bin
-	@mkdir -p ./SDK/local/examples/libzip
-	@mkdir -p ./SDK/local/$*/include
-	@mkdir -p ./SDK/local/$*/lib/pkgconfig
-	@cp ${PKGNAME}/build/lib/libzip.a ./SDK/local/$*/lib/
-	@cp ${PKGNAME}/build/libzip.pc ./SDK/local/$*/lib/pkgconfig/
-	@cp ${PKGNAME}/build/zipconf.h ./SDK/local/$*/include/
-	@cp ${PKGNAME}/lib/zip.h ./SDK/local/$*/include/
-	@cp ${PKGNAME}/build/src/zip* ./SDK/local/$*/bin/
-	@cp ${PKGNAME}/examples/*.c ./SDK/local/examples/libzip/
+	@mkdir -p ./SDK/local/$*/bin \
+		./SDK/local/$*/include/woff2 \
+		./SDK/local/$*/lib/pkgconfig
+	@cp ${PKGNAME}/build/libwoff2*.a ./SDK/local/$*/lib/
+	@cp ${PKGNAME}/build/libwoff2*.pc ./SDK/local/$*/lib/pkgconfig/
+	@cp ${PKGNAME}/include/woff2/* ./SDK/local/$*/include/woff2/
+	@cp ${PKGNAME}/build/woff2_* ./SDK/local/$*/bin/
 
 .PHONY: archive
 archive: ## Create the release archive
