@@ -1,0 +1,25 @@
+diff -ruN woff2-1.0.2/CMakeLists.txt woff2-1.0.2-patched/CMakeLists.txt
+--- woff2-1.0.2/CMakeLists.txt	2017-11-13 18:31:28.000000000 +0000
++++ woff2-1.0.2-patched/CMakeLists.txt	2026-11-08 09:00:52.103492006 +0000
+@@ -7,7 +7,7 @@
+ # several CI services, such as Travis and Drone, use it.  Solaris 11
+ # has 2.8.6, and it's not difficult to support if you already have to
+ # support 2.8.7.
+-cmake_minimum_required(VERSION 2.8.6)
++cmake_minimum_required(VERSION 3.5)
+ 
+ project(woff2)
+ 
+diff -ruN woff2-1.0.2/src/buffer.h woff2-1.0.2-patched/src/buffer.h
+--- woff2-1.0.2/src/buffer.h	2017-11-13 18:31:28.000000000 +0000
++++ woff2-1.0.2-patched/src/buffer.h	2026-11-08 09:05:40.548044241 +0000
+@@ -24,6 +24,9 @@
+ #define ntohs(x) _byteswap_ushort (x)
+ #define htonl(x) _byteswap_ulong (x)
+ #define htons(x) _byteswap_ushort (x)
++#elif defined(__amigaos4__)
++#include <netinet/in.h>
++#include <stdint.h>
+ #else
+ #include <arpa/inet.h>
+ #include <stdint.h>
